@@ -1,0 +1,17 @@
+base_scene_path: "inputs/objaverse/base_scene.blend"
+objects_dir_path: "inputs/objaverse/shapes"
+blender_lm: "gpt-5.2-2025-12-11"
+critic_vlm: "gpt-5.2-2025-12-11"
+edit_model_selection_schedule:
+  - from_attempt: 0
+    to_attempt: null
+    model_probs:
+      "fal-ai/gemini-25-flash-image/edit": 1.0
+num_blender_scenes: 3
+num_renders: 2
+min_render_quality_score: 0.6
+max_edit_attempts: 3
+background_strs:
+  - "sandy background"
+  - "grassy background"
+  - "snowy background"
