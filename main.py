@@ -6,7 +6,7 @@ from poseblend.run import run_poseblend
 
 load_dotenv()
 
-CONFIG_PATH_DEFAULT = "inputs/config/default.yaml"
+CONFIG_PATH_DEFAULT = "inputs/configs/simple.yaml"
 SCENE_PATH_DEFAULT = "inputs/scenes/person_throws_laptop_over_sign_to_dog.yaml"
 BLENDER_OBJECT_DATA_PATH_DEFAULT = "inputs/blender_object_data.yaml"
 

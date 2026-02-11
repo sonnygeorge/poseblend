@@ -9,12 +9,12 @@ from poseblend.schema.lm_outputs import YesNoAnswer
 
 def load_yaml(path: os.PathLike) -> dict:
     with open(path) as f:
-        return yaml.load(f)
+        return yaml.safe_load(f)
 
 
 def ask_lm_yes_no_question_about_image(
     vlm: BaseVLM,
     question: str,
-    image_path: os.PathLike | Image,
+    image_path: os.PathLike | Image.Image,
 ) -> YesNoAnswer:
     pass  # TODO

@@ -1,0 +1,6 @@
+objects:
+  dummy_object:
+    name: dummy_object
+    file: dummy_object.blend
+    scale_factor: 1.0
+    default_facing_orientation: null
