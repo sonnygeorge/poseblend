@@ -19,4 +19,5 @@ dependencies = [
     "huggingface-hub>=1.4.1",
     "transformers>=5.1.0",
     "fal-client>=0.13.0",
+    "loguru>=0.7.3",
 ]
