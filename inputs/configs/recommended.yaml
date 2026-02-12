@@ -1,5 +1,6 @@
 num_blender_scenes: 4
-num_renders: 6
+num_renders: 8
+num_edit_chains: 6
 min_render_quality_score: 0.6
 max_edit_attempts: 3
 base_scene_path: "inputs/objaverse/base_scene.blend"

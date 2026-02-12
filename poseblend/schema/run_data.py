@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import os
+from pathlib import Path
 
-from dataclasses import dataclass, field
+from pydantic import BaseModel
 
 from poseblend.schema.inputs.scene_spec import PoseBlendSceneSpec
 from poseblend.schema.inputs.config import PoseBlendConfig
@@ -11,20 +11,19 @@ from poseblend.schema.edit_chain import EditChain
 from poseblend.utils import load_yaml
 
 
-@dataclass
-class PoseBlendRunData:
+class RunData(BaseModel):
     config: PoseBlendConfig
     scene_spec: PoseBlendSceneSpec
     blender_object_registry: BlenderObjectRegistry
-    edit_chains: list[EditChain] = field(default_factory=list)
+    edit_chains: list[EditChain] = []
 
     @classmethod
     def from_input_yaml_paths(
         cls,
-        config_path: os.PathLike,
-        scene_path: os.PathLike,
-        blender_object_data_path: os.PathLike,
-    ) -> PoseBlendRunData:
+        config_path: Path | str,
+        scene_path: Path | str,
+        blender_object_data_path: Path | str,
+    ) -> RunData:
         config = PoseBlendConfig.model_validate(load_yaml(config_path))
         scene_spec = PoseBlendSceneSpec.model_validate(load_yaml(scene_path))
         blender_object_registry = BlenderObjectRegistry.model_validate(load_yaml(blender_object_data_path))

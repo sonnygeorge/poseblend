@@ -70,3 +70,20 @@ localized_edits:
     - If all edits successful, save last edited image as final image.
 
 NOTE: Even higher avg. quality can be achieved by ranking/dropping some % from final set of images based on some aggregation of confidence score across last round of checks.
+
+## TODO
+
+- Scene param gen step
+  - Generate N blender scene params asynchronously
+- Blender step
+  - Figure out if multiple blender scene rendering processes can be run in parallel
+  - Move blender rendering code into blender/, decide how to share data b/w processes, and write the subprocess running util
+- Scene & render choice step
+  - Critic process for scoring renders...
+  
+## GUI Notes
+
+States:
+- "Generating blender scene params"
+- "Deciding which scene to use"
+- Display edit chains and monitor updates...

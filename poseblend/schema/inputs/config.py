@@ -12,6 +12,7 @@ class AttemptRangeModelSelectionProbs(BaseModel):
 class PoseBlendConfig(BaseModel):
     num_blender_scenes: int
     num_renders: int
+    num_edit_chains: int
     min_render_quality_score: float
     max_edit_attempts: int
     base_scene_path: str

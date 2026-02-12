@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from pydantic import BaseModel
 
@@ -11,8 +11,8 @@ class CheckResult(BaseModel):
 
 
 class AttemptedEdit(BaseModel):
-    before_img_path: os.PathLike
-    after_img_path: os.PathLike
+    before_img_path: Path
+    after_img_path: Path
     check_results: list[CheckResult]
 
     @property
@@ -30,9 +30,9 @@ class AttemptedEdit(BaseModel):
 
 
 class EditChain(BaseModel):
-    starting_render_path: os.PathLike
+    starting_render_path: Path
     edits: list[list[AttemptedEdit]]
-    final_img_path: os.PathLike | None
+    final_img_path: Path | None
     fail_reason: str | None
 
     @property
