@@ -1,7 +1,8 @@
 import asyncio
 from pathlib import Path
 
-from poseblend.models.vlm.base import BaseVLM, Message, MessageContent
+from poseblend.models.vlm.base import Message, MessageContent
+from poseblend.run_context import RunContext
 from poseblend.schema.lm_outputs import BlenderSceneParams
 from poseblend.schema.run_data import RunData
 
@@ -19,10 +20,10 @@ def _build_messages(run_data: RunData) -> list[Message]:
     object_lines = []
     for name in relevant_object_names:
         meta = run_data.blender_object_registry.objects[name]
-        line = f"  - {meta.name} (scale_factor={meta.scale_factor}"
         if meta.default_facing_orientation is not None:
-            line += f", default_facing_orientation={meta.default_facing_orientation}"
-        line += ")"
+            line = f"  - {meta.name} (default_facing_orientation={meta.default_facing_orientation})"
+        else:
+            line = f"  - {meta.name}"
         object_lines.append(line)
     object_details_str = "\n".join(object_lines)
 
@@ -54,12 +55,19 @@ def _build_messages(run_data: RunData) -> list[Message]:
 
 
 async def generate_blender_params(
-    run_data: RunData,
-    vlm: BaseVLM,
+    ctx: RunContext,
+    seeds: list[int | None],
 ) -> list[BlenderSceneParams]:
-    messages = _build_messages(run_data)
+    lm = ctx.get_vlm(ctx.run_data.config.blender_lm)
+    messages = _build_messages(ctx.run_data)
+    temperature = ctx.run_data.config.blender_lm_temperature
     tasks = [
-        vlm.infer_structured(messages=messages, response_model=BlenderSceneParams)
-        for _ in range(run_data.config.num_blender_scenes)
+        lm.infer_structured(
+            messages=messages,
+            response_model=BlenderSceneParams,
+            temperature=temperature,
+            **({"seed": seed} if seed is not None else {}),
+        )
+        for seed in seeds
     ]
     return await asyncio.gather(*tasks)

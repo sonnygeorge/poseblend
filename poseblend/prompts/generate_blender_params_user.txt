@@ -4,7 +4,7 @@ Action: {action}
 Role assignments:
 {role_assignments}
 
-Available objects:
+Objects:
 {object_details}
 
 Requirements that must be satisfied by the final image (arrange objects to set the stage for these):

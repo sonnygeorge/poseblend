@@ -1,6 +1,106 @@
 objects:
-  dummy_object:
-    name: dummy_object
-    file: dummy_object.blend
+  basketball:
+    name: basketball
+    file: basketball.blend
+    scale_factor: 0.035
+    default_facing_orientation: null
+  bed:
+    name: bed
+    file: bed.blend
+    scale_factor: 0.2
+    default_facing_orientation: [0.0, 0.0, 0.0]
+  bike:
+    name: bike
+    file: bike.blend
+    scale_factor: 0.6
+    default_facing_orientation: [0.0, 0.0, 0.0]
+  bird:
+    name: bird
+    file: bird.blend
+    scale_factor: 0.026
+    default_facing_orientation: [0.0, 0.0, 3.1416]
+  bookshelf:
+    name: bookshelf
+    file: bookshelf.blend
+    scale_factor: 0.33
+    default_facing_orientation: [0.0, 0.0, 1.5708]
+  bottle:
+    name: bottle
+    file: bottle.blend
+    scale_factor: 0.05
+    default_facing_orientation: null
+  box:
+    name: box
+    file: box.blend
+    scale_factor: 0.1
+    default_facing_orientation: null
+  camera:
+    name: camera
+    file: camera.blend
+    scale_factor: 2.0
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  car:
+    name: car
+    file: car.blend
+    scale_factor: 0.16
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  chair:
+    name: chair
+    file: chair.blend
+    scale_factor: 0.5
+    default_facing_orientation: [0.0, 0.0, 3.1416]
+  couch:
+    name: couch
+    file: couch.blend
+    scale_factor: 0.2
+    default_facing_orientation: [0.0, 0.0, 0.0]
+  dog:
+    name: dog
+    file: dog.blend
     scale_factor: 1.0
+    default_facing_orientation: [0.0, 0.0, 0.0]
+  hut:
+    name: hut
+    file: hut.blend
+    scale_factor: 0.4
+    default_facing_orientation: [0.0, 0.0, 0.0]
+  lamp:
+    name: lamp
+    file: lamp.blend
+    scale_factor: 0.06
+    default_facing_orientation: [0.0, 0.0, 1.5708]
+  laptop:
+    name: laptop
+    file: laptop.blend
+    scale_factor: 0.18
+    default_facing_orientation: [0.0, 0.0, 3.1416]
+  person:
+    name: person
+    file: person.blend
+    scale_factor: 0.65
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  puma:
+    name: puma
+    file: puma.blend
+    scale_factor: 0.65
+    default_facing_orientation: [0.0, 0.0, 0.0]
+  shoe:
+    name: shoe
+    file: shoe.blend
+    scale_factor: 0.05
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  sign:
+    name: sign
+    file: sign.blend
+    scale_factor: 0.05
+    default_facing_orientation: [0.0, 0.0, 0.0]
+  tree:
+    name: tree
+    file: tree.blend
+    scale_factor: 0.6
+    default_facing_orientation: null
+  violin:
+    name: violin
+    file: violin.blend
+    scale_factor: 1.1
     default_facing_orientation: null

@@ -1,8 +1,6 @@
 import asyncio
 from typing import Type
 
-from pydantic import BaseModel
-
 from poseblend.models.vlm.base import BaseVLM, BaseModelType, Message
 from poseblend.models.image_edit.base import BaseImageEditModel
 
