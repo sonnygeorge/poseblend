@@ -10,7 +10,7 @@ from poseblend.blender.schema import BlenderObjectSpec, ObjectPlacementParams, R
 from poseblend.run_context import RunContext
 from poseblend.schema.run_data import BlenderScene, SceneRender
 
-RENDER_SCRIPT_PATH = Path(__file__).resolve().parent / "blender" / "render_scene.py"
+RENDER_SCRIPT_PATH = Path(__file__).resolve().parent.parent / "blender" / "render_scene.py"
 BLENDER_EXE_ENV_VAR = "BLENDER_EXE"
 
 

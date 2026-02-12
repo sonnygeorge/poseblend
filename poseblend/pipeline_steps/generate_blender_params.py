@@ -6,7 +6,7 @@ from poseblend.run_context import RunContext
 from poseblend.schema.lm_outputs import BlenderSceneParams
 from poseblend.schema.run_data import RunData
 
-PROMPTS_DIR = Path(__file__).parent / "prompts"
+PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 SYSTEM_PROMPT = (PROMPTS_DIR / "generate_blender_params_system.txt").read_text()
 USER_PROMPT_TEMPLATE = (PROMPTS_DIR / "generate_blender_params_user.txt").read_text()
 

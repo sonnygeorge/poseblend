@@ -2,8 +2,8 @@ import time
 
 from loguru import logger
 
-from poseblend.generate_blender_params import generate_blender_params
-from poseblend.render_scenes import render_all_scenes
+from poseblend.pipeline_steps.generate_blender_params import generate_blender_params
+from poseblend.pipeline_steps.render_scenes import render_all_scenes
 from poseblend.run_context import RunContext
 from poseblend.schema.run_data import BlenderScene, RunData
 from poseblend.utils import derive_seeds
