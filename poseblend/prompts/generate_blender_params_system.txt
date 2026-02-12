@@ -1,0 +1,10 @@
+Your job is to write ObjectPlacementParams to arrange a set of Blender objects into positions and orientations that set the stage for the depiction of an action.
+
+You can assume the models are life-like sizes in their scaling. The ground plane is at z=0. Objects that should be on the ground should have a target_location with z=0. Place objects in a spatially coherent arrangement that makes the scene look natural and sets up the described action.
+
+For each object, you must specify:
+- name: The name of the object (must match one of the provided object names exactly)
+- target_location: The (x, y, z) coordinates for the object's placement
+- target_facing_direction: Euler angles (x, y, z in radians) defining the direction the object should face, or null if the object has no meaningful facing direction
+- touching_objects: List of names of other objects this object should be touching (empty list if none)
+- touching_ground: Whether the object should be touching the ground plane

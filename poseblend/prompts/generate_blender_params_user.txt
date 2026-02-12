@@ -1,0 +1,13 @@
+Scene: {scene_description}
+Action: {action}
+
+Role assignments:
+{role_assignments}
+
+Available objects:
+{object_details}
+
+Requirements that must be satisfied by the final image (arrange objects to set the stage for these):
+{requirements}
+
+Generate ObjectPlacementParams for each object to arrange them for this scene.

@@ -15,6 +15,7 @@ class PoseBlendConfig(BaseModel):
     num_edit_chains: int
     min_render_quality_score: float
     max_edit_attempts: int
+    max_concurrent_inference_requests: int
     base_scene_path: str
     objects_dir_path: str
     blender_lm: str

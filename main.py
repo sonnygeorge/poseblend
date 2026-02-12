@@ -1,4 +1,5 @@
 import argparse
+import asyncio
 
 from dotenv import load_dotenv
 
@@ -33,7 +34,7 @@ def main():
     )
     args = parser.parse_args()
 
-    run_poseblend(args.config, args.scene, args.blender_object_data)
+    asyncio.run(run_poseblend(args.config, args.scene, args.blender_object_data))
 
 
 if __name__ == "__main__":

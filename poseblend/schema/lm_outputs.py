@@ -30,3 +30,9 @@ class ObjectPlacementParams(BaseModel):
     touching_ground: bool = Field(
         description="Whether the object should be touching the ground"
     )
+
+
+class BlenderSceneParams(BaseModel):
+    placements: list[ObjectPlacementParams] = Field(
+        description="List of placement parameters for each object in the scene"
+    )
