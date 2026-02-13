@@ -71,16 +71,6 @@ localized_edits:
 
 NOTE: Even higher avg. quality can be achieved by ranking/dropping some % from final set of images based on some aggregation of confidence score across last round of checks.
 
-## TODO
-
-- Scene param gen step
-  - Generate N blender scene params asynchronously
-- Blender step
-  - Figure out if multiple blender scene rendering processes can be run in parallel
-  - Move blender rendering code into blender/, decide how to share data b/w processes, and write the subprocess running util
-- Scene & render choice step
-  - Critic process for scoring renders...
-  
 ## GUI Notes
 
 States:

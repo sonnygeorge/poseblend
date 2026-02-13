@@ -1,15 +1,32 @@
+from enum import IntEnum
+
 from pydantic import BaseModel, Field
 
 
-class YesNoAnswer(BaseModel):
-    reasoning: str = Field(description="Reasoning for the answer")
-    answer: bool = Field(description="Binary yes/no answer")
-    confidence: float | None = Field(
-        default=None,
-        ge=0.0,
-        le=1.0,
-        description="Model confidence between 0 (no confidence) and 1 (full confidence)",
+class LikertScore(IntEnum):
+    CLEARLY_VIOLATED = 1
+    MOSTLY_VIOLATED = 2
+    AMBIGUOUS = 3
+    MOSTLY_SATISFIED = 4
+    CLEARLY_SATISFIED = 5
+
+
+class CriticResult(BaseModel):
+    reasoning: str = Field(
+        description="Step-by-step visual analysis of the requirement"
     )
+    score: LikertScore = Field(
+        description=(
+            "How well the requirement is satisfied in the image: "
+            "1=clearly violated, 2=mostly violated, "
+            "3=ambiguous/partial, 4=mostly satisfied, "
+            "5=clearly satisfied"
+        ),
+    )
+
+    @property
+    def normalized_score(self) -> float:
+        return (self.score - 1) / 4.0
 
 
 # See equivalent dataclass in blender/schema.py

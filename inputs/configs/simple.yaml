@@ -1,10 +1,10 @@
-num_blender_scenes: 2
-num_renders: 3
-num_edit_chains: 2
+num_blender_scenes: 3
+num_renders: 6
+num_edit_chains: 4
 min_render_quality_score: 0.6
 max_edit_attempts: 3
-max_concurrent_inference_requests: 5
-max_concurrent_blender_processes: 2
+max_concurrent_inference_requests: 10
+max_concurrent_blender_processes: 3
 base_scene_path: "inputs/objaverse/base_scene.blend"
 objects_dir_path: "inputs/objaverse/shapes"
 output_dir_path: "outputs"
@@ -14,7 +14,7 @@ camera_fov_degrees: 60
 blender_lm: "gpt-5.2-2025-12-11"
 blender_lm_temperature: 1.0
 critic_vlm: "gpt-5.2-2025-12-11"
-critic_vlm_temperature: 0.3
+critic_vlm_temperature: 0.8
 seed: 42
 edit_model_selection_schedule:
   - from_attempt: 1

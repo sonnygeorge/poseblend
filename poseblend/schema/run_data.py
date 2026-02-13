@@ -3,20 +3,34 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from poseblend.schema.inputs.scene_spec import PoseBlendSceneSpec
 from poseblend.schema.inputs.config import PoseBlendConfig
 from poseblend.schema.inputs.blender_objects import BlenderObjectRegistry
 from poseblend.schema.lm_outputs import BlenderSceneParams
 from poseblend.schema.edit_chain import EditChain
+from poseblend.schema.lm_outputs import CriticResult
 from poseblend.utils import load_yaml, save_json
+
+
+class GateDecision(BaseModel):
+    is_passing: bool
+    reason: str
+
+
+class CriticInvocation(BaseModel):
+    requirement: str
+    result: CriticResult
 
 
 class SceneRender(BaseModel):
     render_id: int
     image_path: Path | None = None
     mask_dir_path: Path | None = None
+    critic_invocations: list[CriticInvocation] = Field(default_factory=list)
+    render_quality_score: float | None = None
+    gate_decision: GateDecision | None = None
 
 
 class BlenderScene(BaseModel):
@@ -25,6 +39,9 @@ class BlenderScene(BaseModel):
     params: BlenderSceneParams
     blend_file_path: Path | None = None
     renders: list[SceneRender] = []
+    scene_quality_score: float | None = None
+    is_selected: bool = False
+    gate_decision: GateDecision | None = None
 
 
 class RunData(BaseModel):

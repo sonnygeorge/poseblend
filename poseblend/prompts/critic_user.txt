@@ -1,0 +1,3 @@
+Requirement: {requirement}
+
+Score how well this requirement is satisfied in the image.

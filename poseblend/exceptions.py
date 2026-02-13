@@ -1,0 +1,2 @@
+class NoSceneGoodEnoughError(Exception):
+    pass
