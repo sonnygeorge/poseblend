@@ -1,9 +1,6 @@
-from typing import Type
-
 from openai import AsyncOpenAI
 
-from poseblend.models.vlm.base import BaseVLM, Message, MessageContent, BaseModelType
-
+from poseblend.models.vlm.base import BaseModelType, BaseVLM, Message, MessageContent
 
 
 def _convert_message_content(content: MessageContent) -> dict:
@@ -45,7 +42,7 @@ class OpenAIVLM(BaseVLM):
         self,
         *,
         messages: list[Message],
-        response_model: Type[BaseModelType],
+        response_model: type[BaseModelType],
         **kwargs,
     ) -> BaseModelType:
         response = await self.client.beta.chat.completions.parse(

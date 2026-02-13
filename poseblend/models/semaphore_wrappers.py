@@ -1,8 +1,7 @@
 import asyncio
-from typing import Type
 
-from poseblend.models.vlm.base import BaseVLM, BaseModelType, Message
 from poseblend.models.image_edit.base import BaseImageEditModel
+from poseblend.models.vlm.base import BaseModelType, BaseVLM, Message
 
 
 class SemaphoreVLM(BaseVLM):
@@ -23,7 +22,7 @@ class SemaphoreVLM(BaseVLM):
         self,
         *,
         messages: list[Message],
-        response_model: Type[BaseModelType],
+        response_model: type[BaseModelType],
         **kwargs,
     ) -> BaseModelType:
         async with self._sem:

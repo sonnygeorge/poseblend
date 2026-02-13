@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Type, TypeVar, Literal, TypedDict
-from pydantic import BaseModel
+from typing import Literal, TypedDict, TypeVar
 
+from pydantic import BaseModel
 
 BaseModelType = TypeVar("BaseModelType", bound=BaseModel)
 
@@ -31,7 +31,7 @@ class BaseVLM(ABC):
         self,
         *,
         messages: list[Message],
-        response_model: Type[BaseModelType],
+        response_model: type[BaseModelType],
         **kwargs,
     ) -> BaseModelType:
         pass

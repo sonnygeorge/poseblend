@@ -1,9 +1,9 @@
 import asyncio
 
-from poseblend.models.registry import get_vlm, get_image_edit_model
-from poseblend.models.semaphore_wrappers import SemaphoreVLM, SemaphoreImageEditModel
-from poseblend.models.vlm.base import BaseVLM
 from poseblend.models.image_edit.base import BaseImageEditModel
+from poseblend.models.registry import get_image_edit_model, get_vlm
+from poseblend.models.semaphore_wrappers import SemaphoreImageEditModel, SemaphoreVLM
+from poseblend.models.vlm.base import BaseVLM
 from poseblend.schema.run_data import RunData
 
 

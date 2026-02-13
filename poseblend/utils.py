@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import base64
 import json
 import mimetypes
@@ -33,6 +31,8 @@ def save_json(data: dict, path: os.PathLike) -> None:
 
 def derive_seed(base_seed: int, n: int) -> int:
     """Advance a PRNG seeded with ``base_seed`` by ``n`` steps and return the last value."""
+    if n <= 0:
+        raise ValueError(f"n must be positive, got {n}")
     rng = random.Random(base_seed)
     for _ in range(n):
         derived = rng.randint(0, 2**32 - 1)
@@ -54,7 +54,7 @@ def image_path_to_data_uri(path: str | os.PathLike) -> str:
     return f"data:{mime};base64,{b64}"
 
 
-def build_visibility_requirements(ctx: RunContext) -> list[str]:
+def build_visibility_requirements(ctx: "RunContext") -> list[str]:
     unique_objects = sorted(set(ctx.run_data.scene_spec.role_assignments.values()))
     return [
         f"A single {obj} is visible in the image." for obj in unique_objects
@@ -62,7 +62,7 @@ def build_visibility_requirements(ctx: RunContext) -> list[str]:
 
 
 async def invoke_critic(
-    ctx: RunContext,
+    ctx: "RunContext",
     image_path: str | os.PathLike,
     requirement: str,
 ) -> CriticResult:

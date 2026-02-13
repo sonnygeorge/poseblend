@@ -30,8 +30,7 @@ def _build_messages(run_data: RunData) -> list[Message]:
     hydrated_reqs = run_data.scene_spec.get_hydrated_edit_requirements()
     req_lines = []
     for edit_reqs in hydrated_reqs:
-        for req in edit_reqs:
-            req_lines.append(f"  - {req}")
+        req_lines.extend(f"  - {req}" for req in edit_reqs)
     requirements_str = "\n".join(req_lines)
 
     user_text = USER_PROMPT_TEMPLATE.format(

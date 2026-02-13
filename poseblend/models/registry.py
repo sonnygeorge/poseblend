@@ -1,9 +1,9 @@
 from functools import partial
 
-from poseblend.models.vlm.base import BaseVLM
-from poseblend.models.vlm.openai import OpenAIVLM
 from poseblend.models.image_edit.base import BaseImageEditModel
 from poseblend.models.image_edit.fal import FalMultiImageEditModel, FalSingleImageEditModel
+from poseblend.models.vlm.base import BaseVLM
+from poseblend.models.vlm.openai import OpenAIVLM
 
 _VLM_FACTORIES: dict[str, partial[BaseVLM]] = {
     "gpt-5.2-2025-12-11": partial(OpenAIVLM, "gpt-5.2-2025-12-11"),

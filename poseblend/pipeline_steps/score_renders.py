@@ -18,7 +18,9 @@ async def _score_single_render(
     visibility_requirements: list[str],
     edit_requirements: list[str],
 ) -> None:
-    assert render.image_path is not None, f"Render {render.render_id} has no image_path"
+    if render.image_path is None:
+        msg = f"Render {render.render_id} has no image_path"
+        raise ValueError(msg)
 
     # Phase 1: visibility checks (hard gate, short-circuit on first failure)
     visibility_results = []

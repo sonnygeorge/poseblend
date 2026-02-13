@@ -10,6 +10,7 @@ class BlenderObjectMetadata:
     default_facing_orientation: list[float] | None
 
 
+# See equivalent pydantic class in poseblend/schema/llm_outputs.py
 @dataclass
 class ObjectPlacementParams:
     name: str

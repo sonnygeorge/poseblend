@@ -6,6 +6,8 @@ import tempfile
 from dataclasses import asdict
 from pathlib import Path
 
+from loguru import logger
+
 from poseblend.blender.schema import BlenderObjectSpec, ObjectPlacementParams, RenderJob
 from poseblend.run_context import RunContext
 from poseblend.schema.run_data import BlenderScene, SceneRender
@@ -37,14 +39,15 @@ def _build_render_job(
             default_facing_orientation=meta.default_facing_orientation,
         )))
 
-    placements = []
-    for p in scene.params.placements:
-        placements.append(asdict(ObjectPlacementParams(
+    placements = [
+        asdict(ObjectPlacementParams(
             name=p.name,
             target_location=p.target_location,
             target_facing_direction=p.target_facing_direction,
             touching_ground=p.touching_ground,
-        )))
+        ))
+        for p in scene.params.placements
+    ]
 
     job = RenderJob(
         base_scene_path=config.base_scene_path,
@@ -70,7 +73,7 @@ async def _render_single_scene(
     job_dict = _build_render_job(scene, scene_dir, ctx)
 
     # Write job JSON to a temp file
-    tmp_file = tempfile.NamedTemporaryFile(
+    tmp_file = tempfile.NamedTemporaryFile(  # noqa: SIM115
         mode="w", suffix=".json", delete=False, prefix="poseblend_job_"
     )
     try:
@@ -89,17 +92,16 @@ async def _render_single_scene(
         await proc.wait()
 
         if proc.returncode != 0:
-            print(f"Blender process for scene {scene.scene_id} failed (exit code {proc.returncode})")
+            logger.error(f"Blender process for scene {scene.scene_id} failed (exit code {proc.returncode})")
             return
 
         # Read manifest
         manifest_path = scene_dir / "manifest.json"
         if not manifest_path.exists():
-            print(f"No manifest found for scene {scene.scene_id} at {manifest_path}")
+            logger.error(f"No manifest found for scene {scene.scene_id} at {manifest_path}")
             return
 
-        with open(manifest_path, "r") as f:
-            manifest = json.load(f)
+        manifest = json.loads(manifest_path.read_text())
 
         scene.blend_file_path = Path(manifest["blend_file_path"])
         scene.renders = [
@@ -110,9 +112,9 @@ async def _render_single_scene(
             )
             for i, r in enumerate(manifest["renders"])
         ]
-        os.unlink(manifest_path)
+        manifest_path.unlink()
     finally:
-        os.unlink(tmp_file.name)
+        Path(tmp_file.name).unlink()
 
 
 async def render_all_scenes(ctx: RunContext) -> None:
@@ -146,3 +148,10 @@ async def render_all_scenes(ctx: RunContext) -> None:
 
     tasks = [_gated_render(scene) for scene in ctx.run_data.scenes]
     await asyncio.gather(*tasks)
+
+    scenes = ctx.run_data.scenes
+    if all(not scene.renders for scene in scenes):
+        raise RuntimeError(
+            f"All {len(scenes)} scene(s) failed to render. "
+            "Check Blender logs above for details."
+        )

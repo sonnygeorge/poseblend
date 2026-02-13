@@ -6,19 +6,21 @@ from pathlib import Path
 import bpy
 import numpy as np
 
+# Blender runs scripts with its own bundled Python, which doesn't have the project
+# root on sys.path. We add it manually so that poseblend imports resolve correctly.
 _src = Path(__file__).resolve().parent.parent.parent
 if str(_src) not in sys.path:
     sys.path.insert(0, str(_src))
 
-from poseblend.blender.schema import (
+from poseblend.blender.schema import (  # noqa: E402
     BlenderObjectSpec,
     ObjectPlacementParams,
     RenderJob,
 )
-from poseblend.blender.utils import (
+from poseblend.blender.utils import (  # noqa: E402
     compute_combined_bbox,
+    elevation_azimuth_to_unit_vector,
     min_camera_distance_for_bbox,
-    pitch_tilt_to_unit_vector,
     place_objects,
     render_object_masks,
     save_masks,
@@ -27,26 +29,20 @@ from poseblend.blender.utils import (
 MAX_CAMERA_ANGLE_SAMPLES = 50
 MAX_RENDER_ATTEMPTS = 5
 
-CAMERA_TILT_MIN_RADS = math.radians(7.5)
-CAMERA_TILT_MAX_RADS = math.radians(81)
-CAMERA_TILT_MEAN_RADS = math.radians(34)
-CAMERA_TILT_STD_RADS = math.radians(12)
+CAMERA_ELEVATION_MIN_RADS = math.radians(7.5)
+CAMERA_ELEVATION_MAX_RADS = math.radians(81)
+CAMERA_ELEVATION_MEAN_RADS = math.radians(34)
+CAMERA_ELEVATION_STD_RADS = math.radians(12)
+
+RENDER_ENGINE = "CYCLES"
 
 
 def _load_render_job(job_path: str) -> RenderJob:
     with open(job_path, "r") as f:
         data: dict = json.load(f)
-    return RenderJob(
-        base_scene_path=data["base_scene_path"],
-        objects=[BlenderObjectSpec(**o) for o in data["objects"]],
-        placements=[ObjectPlacementParams(**p) for p in data["placements"]],
-        output_dir=data["output_dir"],
-        num_renders=data["num_renders"],
-        resolution_x=data["resolution_x"],
-        resolution_y=data["resolution_y"],
-        camera_fov_degrees=data["camera_fov_degrees"],
-        seed=data.get("seed"),
-    )
+    data["objects"] = [BlenderObjectSpec(**o) for o in data["objects"]]
+    data["placements"] = [ObjectPlacementParams(**p) for p in data["placements"]]
+    return RenderJob(**data)
 
 
 def render_scene(job: RenderJob) -> dict:
@@ -55,7 +51,7 @@ def render_scene(job: RenderJob) -> dict:
     bpy.ops.wm.open_mainfile(filepath=job.base_scene_path)
 
     render_args = bpy.context.scene.render
-    render_args.engine = "CYCLES"
+    render_args.engine = RENDER_ENGINE
     render_args.film_transparent = False
 
     # Set up world environment lighting (grey ambient light)
@@ -112,21 +108,21 @@ def render_scene(job: RenderJob) -> dict:
         masks: list[np.ndarray] = []
         found_usable_angle = False
         for _attempt in range(MAX_CAMERA_ANGLE_SAMPLES):
-            tilt = float(np.clip(
-                rng.normal(CAMERA_TILT_MEAN_RADS, CAMERA_TILT_STD_RADS),
-                CAMERA_TILT_MIN_RADS,
-                CAMERA_TILT_MAX_RADS,
+            elevation = float(np.clip(
+                rng.normal(CAMERA_ELEVATION_MEAN_RADS, CAMERA_ELEVATION_STD_RADS),
+                CAMERA_ELEVATION_MIN_RADS,
+                CAMERA_ELEVATION_MAX_RADS,
             ))
-            pan = float(rng.uniform(-math.pi, math.pi))
+            azimuth = float(rng.uniform(-math.pi, math.pi))
             min_distance = min_camera_distance_for_bbox(
                 bbox=bbox_all,
-                camera_pitch=tilt,
-                camera_tilt=pan,
+                camera_elevation=elevation,
+                camera_azimuth=azimuth,
                 camera_fov_angle_rads=camera_fov_rads,
                 camera_aspect_ratio=aspect_ratio,
             )
             distance = float(rng.uniform(0.015, 0.05)) * min_distance + min_distance
-            look_dir = pitch_tilt_to_unit_vector(tilt, pan)
+            look_dir = elevation_azimuth_to_unit_vector(elevation, azimuth)
             camera.location = bbox_all.center - distance * look_dir
             camera.rotation_euler = look_dir.to_track_quat("-Z", "Y").to_euler("XYZ")
 
@@ -138,7 +134,7 @@ def render_scene(job: RenderJob) -> dict:
             break
 
         if not found_usable_angle:
-            print(
+            print(  # noqa: T201
                 f"WARNING: Failed to find non-overlapping camera angle for render {render_id} "
                 f"after {MAX_CAMERA_ANGLE_SAMPLES} attempts. Using last sampled angle."
             )
@@ -154,10 +150,10 @@ def render_scene(job: RenderJob) -> dict:
             try:
                 bpy.ops.render.render(write_still=True)
                 break
-            except Exception as e:
-                print(f"Render attempt {attempt + 1}/{MAX_RENDER_ATTEMPTS} failed: {e}")
+            except Exception as e:  # noqa: BLE001
+                print(f"Render attempt {attempt + 1}/{MAX_RENDER_ATTEMPTS} failed: {e}")  # noqa: T201
         else:
-            print(f"Gave up after {MAX_RENDER_ATTEMPTS} render attempts for render {render_id}.")
+            print(f"Gave up after {MAX_RENDER_ATTEMPTS} render attempts for render {render_id}.")  # noqa: T201
 
         manifest_renders.append({
             "image_path": render_path,

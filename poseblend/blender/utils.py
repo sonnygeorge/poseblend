@@ -1,5 +1,4 @@
 import math
-import os
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,8 +19,7 @@ class BoundingBox:
 def compute_combined_bbox(objects: list[bpy.types.Object]) -> BoundingBox:
     all_corners: list[Vector] = []
     for obj in objects:
-        for corner in obj.bound_box:
-            all_corners.append(obj.matrix_world @ Vector(corner))
+        all_corners.extend(obj.matrix_world @ Vector(corner) for corner in obj.bound_box)
     if not all_corners:
         return BoundingBox(center=Vector((0, 0, 0)), corners=[])
     min_x = min(v.x for v in all_corners)
@@ -44,13 +42,12 @@ def compute_combined_bbox(objects: list[bpy.types.Object]) -> BoundingBox:
     return BoundingBox(center=center, corners=corners)
 
 
-def pitch_tilt_to_unit_vector(pitch: float, tilt: float) -> Vector:
-    el, az = pitch, tilt
+def elevation_azimuth_to_unit_vector(elevation: float, azimuth: float) -> Vector:
     vec = Vector(
         (
-            math.cos(el) * math.cos(az),
-            math.cos(el) * math.sin(az),
-            -math.sin(el),
+            math.cos(elevation) * math.cos(azimuth),
+            math.cos(elevation) * math.sin(azimuth),
+            -math.sin(elevation),
         )
     )
     vec.normalize()
@@ -111,8 +108,8 @@ def place_objects(
 
 def min_camera_distance_for_bbox(
     bbox: BoundingBox,
-    camera_pitch: float,
-    camera_tilt: float,
+    camera_elevation: float,
+    camera_azimuth: float,
     camera_fov_angle_rads: float,
     camera_aspect_ratio: float,
 ) -> float:
@@ -120,7 +117,7 @@ def min_camera_distance_for_bbox(
         return 0.0
     center = bbox.center
     corners = bbox.corners
-    look_dir = pitch_tilt_to_unit_vector(camera_pitch, camera_tilt)
+    look_dir = elevation_azimuth_to_unit_vector(camera_elevation, camera_azimuth)
     rot = look_dir.to_track_quat("-Z", "Y").to_matrix()
     right = Vector(rot.col[0])
     up = Vector(rot.col[1])
@@ -136,7 +133,7 @@ def min_camera_distance_for_bbox(
         y_cam = p_rel.dot(up)
         min_depth = max(abs(x_cam) / tan_h, abs(y_cam) / tan_v)
         d_candidates.append(min_depth - depth_offset)
-    return max(0.0, max(d_candidates))
+    return max(0.0, *d_candidates)
 
 
 def render_object_masks(
@@ -166,7 +163,7 @@ def render_object_masks(
                 if obj.type == "MESH":
                     obj.hide_render = obj.name != target_obj.name
 
-            tmp_path = os.path.join(tmp_dir, f"mask_{idx}.png")
+            tmp_path = str(Path(tmp_dir) / f"mask_{idx}.png")
             render_args.filepath = tmp_path
             bpy.ops.render.render(write_still=True)
 
@@ -197,7 +194,7 @@ def save_masks(
         return
     h, w = masks[0].shape
 
-    os.makedirs(mask_dir, exist_ok=True)
+    Path(mask_dir).mkdir(parents=True, exist_ok=True)
 
     def _write_mask(mask: np.ndarray, filepath: str) -> None:
         img = bpy.data.images.new("_tmp_mask_save", width=w, height=h)
@@ -213,9 +210,9 @@ def save_masks(
         bpy.data.images.remove(img)
 
     for mask, obj in zip(masks, placed_objects):
-        path = os.path.join(mask_dir, f"{obj.name}.png")
+        path = str(Path(mask_dir) / f"{obj.name}.png")
         _write_mask(mask, path)
 
     combined = np.clip(np.sum(masks, axis=0), 0.0, 1.0)
-    path = os.path.join(mask_dir, "all.png")
+    path = str(Path(mask_dir) / "all.png")
     _write_mask(combined, path)

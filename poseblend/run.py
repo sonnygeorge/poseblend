@@ -49,14 +49,13 @@ async def run_poseblend(config_path: str, scene_path: str, blender_object_data_p
     )
     # Select best scene and top renders
     try:
-        selected_renders = select_renders(ctx)
+        select_renders(ctx)  # TODO: run edit chains on selected_renders
     except NoSceneGoodEnoughError as e:
         logger.error(f"Pipeline stopped: {e}")
         run_data.save()
         logger.info(f"Total elapsed time: {time.time() - run_start:.2f}s")
         return
 
-    # TODO: run edit chains on selected_renders...
     # Save run data
     run_data.save()
     logger.info(f"Total elapsed time: {time.time() - run_start:.2f}s")

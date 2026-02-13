@@ -1,16 +1,13 @@
-from __future__ import annotations
-
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, Field, model_validator
 
-from poseblend.schema.inputs.scene_spec import PoseBlendSceneSpec
-from poseblend.schema.inputs.config import PoseBlendConfig
-from poseblend.schema.inputs.blender_objects import BlenderObjectRegistry
-from poseblend.schema.lm_outputs import BlenderSceneParams
 from poseblend.schema.edit_chain import EditChain
-from poseblend.schema.lm_outputs import CriticResult
+from poseblend.schema.inputs.blender_objects import BlenderObjectRegistry
+from poseblend.schema.inputs.config import PoseBlendConfig
+from poseblend.schema.inputs.scene_spec import PoseBlendSceneSpec
+from poseblend.schema.lm_outputs import BlenderSceneParams, CriticResult
 from poseblend.utils import load_yaml, save_json
 
 
@@ -38,7 +35,7 @@ class BlenderScene(BaseModel):
     seed: int | None = None
     params: BlenderSceneParams
     blend_file_path: Path | None = None
-    renders: list[SceneRender] = []
+    renders: list[SceneRender] = Field(default_factory=list)
     scene_quality_score: float | None = None
     is_selected: bool = False
     gate_decision: GateDecision | None = None
@@ -49,8 +46,8 @@ class RunData(BaseModel):
     scene_spec: PoseBlendSceneSpec
     blender_object_registry: BlenderObjectRegistry
     run_id: str
-    scenes: list[BlenderScene] = []
-    edit_chains: list[EditChain] = []
+    scenes: list[BlenderScene] = Field(default_factory=list)
+    edit_chains: list[EditChain] = Field(default_factory=list)
 
     @property
     def run_dir(self) -> Path:
@@ -63,7 +60,7 @@ class RunData(BaseModel):
         return path
 
     @model_validator(mode="after")
-    def _validate_role_assignments_in_registry(self) -> RunData:
+    def _validate_role_assignments_in_registry(self) -> "RunData":
         invalid = set(self.scene_spec.role_assignments.values()) - set(
             self.blender_object_registry.objects.keys()
         )
@@ -78,11 +75,11 @@ class RunData(BaseModel):
         config_path: Path | str,
         scene_path: Path | str,
         blender_object_data_path: Path | str,
-    ) -> RunData:
+    ) -> "RunData":
         config = PoseBlendConfig.model_validate(load_yaml(config_path))
         scene_spec = PoseBlendSceneSpec.model_validate(load_yaml(scene_path))
         blender_object_registry = BlenderObjectRegistry.model_validate(load_yaml(blender_object_data_path))
-        run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        run_id = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
 
         return cls(
             config=config,

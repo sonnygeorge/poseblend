@@ -2,7 +2,7 @@ from loguru import logger
 
 from poseblend.exceptions import NoSceneGoodEnoughError
 from poseblend.run_context import RunContext
-from poseblend.schema.run_data import GateDecision, SceneRender
+from poseblend.schema.run_data import BlenderScene, GateDecision, SceneRender
 
 
 def select_renders(ctx: RunContext) -> list[SceneRender]:
@@ -14,7 +14,7 @@ def select_renders(ctx: RunContext) -> list[SceneRender]:
         scene.scene_quality_score = sum(scores) / len(scores) if scores else 0.0
 
     # Select the winning scene
-    best_scene = max(ctx.run_data.scenes, key=lambda s: s.scene_quality_score)
+    best_scene: BlenderScene = max(ctx.run_data.scenes, key=lambda s: s.scene_quality_score)
     best_scene.is_selected = True
     best_scene.gate_decision = GateDecision(
         is_passing=True,
@@ -69,7 +69,7 @@ def select_renders(ctx: RunContext) -> list[SceneRender]:
         raise NoSceneGoodEnoughError(
             f"No renders in scene {best_scene.scene_id} meet the minimum quality "
             f"threshold ({threshold}). Best render score: "
-            f"{max(r.render_quality_score or 0.0 for r in best_scene.renders):.3f}"
+            f"{max((r.render_quality_score or 0.0 for r in best_scene.renders), default=0.0):.3f}"
         )
 
     selected = ranked_passing[: config.num_edit_chains]

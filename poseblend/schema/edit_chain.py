@@ -38,11 +38,15 @@ class EditChain(BaseModel):
     @property
     def was_failure(self) -> bool:
         has_fail_reason = self.fail_reason is not None
-        assert not (has_fail_reason and self.final_img_path is not None)
+        if has_fail_reason and self.final_img_path is not None:
+            msg = "EditChain cannot have both a fail_reason and a final_img_path"
+            raise ValueError(msg)
         return has_fail_reason
 
     @property
     def was_success(self) -> bool:
         has_final_img = self.final_img_path is not None
-        assert not (has_final_img and self.was_failure)
+        if has_final_img and self.fail_reason is not None:
+            msg = "EditChain cannot have both a final_img_path and a fail_reason"
+            raise ValueError(msg)
         return has_final_img
