@@ -13,9 +13,9 @@ localized_edits:
   - region_contains:
       - thrown
     requirements:
-      - "{thrown} is airborne directly above {thrown_over}."
+      - "In the scene geometry, {thrown} is airborne (more or less) directly above {thrown_over}."
       - "Hurtling through the air, {thrown} is tilted off-axis."
-      - "Wind marks trail behind {thrown}, indicating it is flying from {thrower} to {thrown_to}."
+      - "Small, subtle wind marks trail behind {thrown}, indicating it is flying from {thrower} to {thrown_to}."
   - region_contains:
       - thrower
     requirements:

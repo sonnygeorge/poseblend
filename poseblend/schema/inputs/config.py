@@ -14,7 +14,7 @@ class PoseBlendConfig(BaseModel):
     min_render_quality_score: float
     max_edit_attempts: int
     max_concurrent_inference_requests: int
-    max_concurrent_blender_processes: int = 3  # recommended to be a divisor of num_blender_scenes
+    max_concurrent_blender_processes: int  # recommended to be a divisor of num_blender_scenes
     base_scene_path: str
     objects_dir_path: str
     output_dir_path: str = "outputs"
@@ -26,5 +26,6 @@ class PoseBlendConfig(BaseModel):
     critic_vlm: str
     critic_vlm_temperature: float
     seed: int | None = None
+    single_object_check_threshold: float
     edit_model_selection_schedule: list[AttemptRangeModelSelectionProbs]
     background_strs: list[str]

@@ -6,6 +6,7 @@ import random
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import aiohttp
 import yaml
 
 from poseblend.models.vlm.base import Message, MessageContent
@@ -46,6 +47,40 @@ def derive_seeds(base_seed: int | None, count: int) -> list[int | None]:
     return [derive_seed(base_seed, i + 1) for i in range(count)]
 
 
+def sample_from_discrete_distribution(
+    distribution: dict[str, float], seed: int | None = None
+) -> str:
+    """Randomly select a key from a discrete probability distribution.
+
+    Args:
+        distribution: A mapping of string keys to their probability weights.
+        seed: Optional random seed for reproducibility.
+
+    Returns:
+        A single key sampled according to the given probability weights.
+    """
+    keys = list(distribution.keys())
+    weights = list(distribution.values())
+    rng = random.Random(seed)
+    return rng.choices(keys, weights=weights, k=1)[0]
+
+
+def grammatical_join(items: list[str]) -> str:
+    """Join strings into a grammatical, sentence-insertable listing.
+
+    Examples:
+        >>> grammatical_join(["foo"])
+        'foo'
+        >>> grammatical_join(["foo", "bar"])
+        'foo and bar'
+        >>> grammatical_join(["foo", "bar", "fizz"])
+        'foo, bar, and fizz'
+    """
+    if len(items) <= 2:
+        return " and ".join(items)
+    return ", ".join(items[:-1]) + f", and {items[-1]}"
+
+
 def image_path_to_data_uri(path: str | os.PathLike) -> str:
     mime, _ = mimetypes.guess_type(str(path))
     mime = mime or "image/png"
@@ -54,7 +89,16 @@ def image_path_to_data_uri(path: str | os.PathLike) -> str:
     return f"data:{mime};base64,{b64}"
 
 
-def build_visibility_requirements(ctx: "RunContext") -> list[str]:
+async def download_image(url: str, save_path: Path) -> Path:
+    """Download an image from ``url`` and write it to ``save_path``."""
+    save_path.parent.mkdir(parents=True, exist_ok=True)
+    async with aiohttp.ClientSession() as session, session.get(url) as resp:
+        resp.raise_for_status()
+        save_path.write_bytes(await resp.read())
+    return save_path
+
+
+def build_single_object_requirements(ctx: "RunContext") -> list[str]:
     unique_objects = sorted(set(ctx.run_data.scene_spec.role_assignments.values()))
     return [
         f"A single {obj} is visible in the image." for obj in unique_objects

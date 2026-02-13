@@ -2,9 +2,7 @@ import asyncio
 
 from poseblend.run_context import RunContext
 from poseblend.schema.run_data import CriticInvocation, GateDecision, SceneRender
-from poseblend.utils import build_visibility_requirements, invoke_critic
-
-VISIBILITY_GATE_THRESHOLD = 0.4
+from poseblend.utils import build_single_object_requirements, invoke_critic
 
 
 def _build_edit_requirements(ctx: RunContext) -> list[str]:
@@ -15,22 +13,22 @@ def _build_edit_requirements(ctx: RunContext) -> list[str]:
 async def _score_single_render(
     ctx: RunContext,
     render: SceneRender,
-    visibility_requirements: list[str],
+    single_object_requirements: list[str],
     edit_requirements: list[str],
 ) -> None:
     if render.image_path is None:
         msg = f"Render {render.render_id} has no image_path"
         raise ValueError(msg)
 
-    # Phase 1: visibility checks (hard gate, short-circuit on first failure)
-    visibility_results = []
-    for req in visibility_requirements:
+    # Phase 1: single-object checks (hard gate, short-circuit on first failure)
+    single_object_results = []
+    for req in single_object_requirements:
         result = await invoke_critic(ctx, render.image_path, req)
         render.critic_invocations.append(
             CriticInvocation(requirement=req, result=result)
         )
-        visibility_results.append(result)
-        if result.normalized_score < VISIBILITY_GATE_THRESHOLD:
+        single_object_results.append(result)
+        if result.normalized_score < ctx.run_data.config.single_object_check_threshold:
             score_label = result.score.name.lower().replace("_", " ")
             threshold = ctx.run_data.config.min_render_quality_score
             render.render_quality_score = 0.0
@@ -43,7 +41,7 @@ async def _score_single_render(
                 ),
             )
             return
-    visibility_scores = [r.normalized_score for r in visibility_results]
+    single_object_scores = [r.normalized_score for r in single_object_results]
 
     # Phase 2: edit requirement checks
     edit_results = await asyncio.gather(*[
@@ -56,12 +54,12 @@ async def _score_single_render(
         )
     edit_scores = [r.normalized_score for r in edit_results]
 
-    all_scores = visibility_scores + edit_scores
+    all_scores = single_object_scores + edit_scores
     render.render_quality_score = sum(all_scores) / len(all_scores)
 
 
 async def score_all_renders(ctx: RunContext) -> None:
-    visibility_reqs = build_visibility_requirements(ctx)
+    single_object_reqs = build_single_object_requirements(ctx)
     edit_reqs = _build_edit_requirements(ctx)
 
     all_renders = [
@@ -71,6 +69,6 @@ async def score_all_renders(ctx: RunContext) -> None:
     ]
 
     await asyncio.gather(*[
-        _score_single_render(ctx, render, visibility_reqs, edit_reqs)
+        _score_single_render(ctx, render, single_object_reqs, edit_reqs)
         for render in all_renders
     ])

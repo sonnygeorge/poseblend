@@ -3,7 +3,6 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field, model_validator
 
-from poseblend.schema.edit_chain import EditChain
 from poseblend.schema.inputs.blender_objects import BlenderObjectRegistry
 from poseblend.schema.inputs.config import PoseBlendConfig
 from poseblend.schema.inputs.scene_spec import PoseBlendSceneSpec
@@ -19,6 +18,22 @@ class GateDecision(BaseModel):
 class CriticInvocation(BaseModel):
     requirement: str
     result: CriticResult
+
+
+class AttemptedEdit(BaseModel):
+    seed: int | None
+    before_img_path: Path
+    after_img_path: Path
+    critic_invocations: list[CriticInvocation]
+    model_used: str
+    gate_decision: GateDecision
+
+
+class EditChain(BaseModel):
+    starting_render_path: Path
+    edits: list[list[AttemptedEdit]]
+    final_img_path: Path | None
+    gate_decision: GateDecision | None = None
 
 
 class SceneRender(BaseModel):

@@ -35,7 +35,7 @@ def select_renders(ctx: RunContext) -> list[SceneRender]:
             )
 
     # Set gate decisions for renders in the winning scene that don't already
-    # have one (visibility-fail renders already have theirs from scoring)
+    # have one (single-object-check-fail renders already have theirs from scoring)
     threshold = config.min_render_quality_score
     for render in best_scene.renders:
         if render.gate_decision is not None:

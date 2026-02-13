@@ -7,9 +7,10 @@ from poseblend.run import run_poseblend
 
 load_dotenv()
 
-CONFIG_PATH_DEFAULT = "inputs/configs/simple.yaml"
-SCENE_PATH_DEFAULT = "inputs/scenes/person_throws_laptop_over_sign_to_dog.yaml"
-# SCENE_PATH_DEFAULT = "inputs/scenes/puma_shows_bird_to_person_dog_nearby.yaml"
+# CONFIG_PATH_DEFAULT = "inputs/configs/simple.yaml"
+CONFIG_PATH_DEFAULT = "inputs/configs/recommended.yaml"
+# SCENE_PATH_DEFAULT = "inputs/scenes/person_throws_laptop_over_sign_to_dog.yaml"
+SCENE_PATH_DEFAULT = "inputs/scenes/puma_shows_bird_to_person_car_nearby.yaml"
 BLENDER_OBJECT_DATA_PATH_DEFAULT = "inputs/blender_object_data.yaml"
 
 

@@ -20,6 +20,7 @@ dependencies = [
     "transformers>=5.1.0",
     "fal-client>=0.13.0",
     "loguru>=0.7.3",
+    "aiohttp>=3.9.0",
 ]
 
 [tool.ruff]
