@@ -24,8 +24,9 @@ class AttemptedEdit(BaseModel):
     seed: int | None
     before_img_path: Path
     after_img_path: Path
-    critic_invocations: list[CriticInvocation]
+    prompt_used: str
     model_used: str
+    critic_invocations: list[CriticInvocation]
     gate_decision: GateDecision
 
 

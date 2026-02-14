@@ -1,4 +1,5 @@
 import time
+from collections.abc import Callable
 
 from loguru import logger
 
@@ -13,11 +14,18 @@ from poseblend.schema.run_data import BlenderScene, RunData
 from poseblend.utils import derive_seeds
 
 
-async def run_poseblend(config_path: str, scene_path: str, blender_object_data_path: str) -> None:
+async def run_poseblend(
+    config_path: str,
+    scene_path: str,
+    blender_object_data_path: str,
+    on_update: Callable[[], None] | None = None,
+    run_data: RunData | None = None,
+) -> RunData:
     run_start = time.time()
     # Initialize run data and run context objects
-    run_data = RunData.from_input_yaml_paths(config_path, scene_path, blender_object_data_path)
-    ctx = RunContext(run_data)
+    if run_data is None:
+        run_data = RunData.from_input_yaml_paths(config_path, scene_path, blender_object_data_path)
+    ctx = RunContext(run_data, on_update=on_update)
     n_scenes = run_data.config.num_blender_scenes
     n_renders = run_data.config.num_renders
     # Derive per-scene seeds from config seed
@@ -33,6 +41,7 @@ async def run_poseblend(config_path: str, scene_path: str, blender_object_data_p
         BlenderScene(scene_id=i + 1, seed=seed, params=params)
         for i, (params, seed) in enumerate(zip(params_list, scene_seeds))
     ]
+    ctx.notify()
     # Render all blender scenes (spawns blender subprocesses)
     step_start = time.time()
     await render_all_scenes(ctx)
@@ -54,8 +63,10 @@ async def run_poseblend(config_path: str, scene_path: str, blender_object_data_p
     except NoSceneGoodEnoughError as e:
         logger.error(f"Pipeline stopped: {e}")
         run_data.save()
+        ctx.notify()
         logger.info(f"Total elapsed time: {time.time() - run_start:.2f}s")
-        return
+        return run_data
+    ctx.notify()
     # Perform edits on selected renders
     step_start = time.time()
     await perform_all_edits(ctx, selected_renders)
@@ -66,3 +77,4 @@ async def run_poseblend(config_path: str, scene_path: str, blender_object_data_p
     # Save run data
     run_data.save()
     logger.info(f"Total elapsed time: {time.time() - run_start:.2f}s")
+    return run_data

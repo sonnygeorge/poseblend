@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Callable
 
 from poseblend.models.image_edit.base import BaseImageEditModel
 from poseblend.models.registry import get_image_edit_model, get_vlm
@@ -8,14 +9,19 @@ from poseblend.schema.run_data import RunData
 
 
 class RunContext:
-    def __init__(self, run_data: RunData):
+    def __init__(self, run_data: RunData, on_update: Callable[[], None] | None = None):
         self.run_data = run_data
+        self._on_update = on_update
         self._inference_semaphore = asyncio.Semaphore(
             run_data.config.max_concurrent_inference_requests
         )
         self._blender_semaphore = asyncio.Semaphore(
             run_data.config.max_concurrent_blender_processes
         )
+
+    def notify(self):
+        if self._on_update is not None:
+            self._on_update()
 
     @property
     def blender_semaphore(self) -> asyncio.Semaphore:

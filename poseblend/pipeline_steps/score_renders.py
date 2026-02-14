@@ -40,6 +40,7 @@ async def _score_single_render(
                     f'{threshold} threshold. Reasoning: "{result.reasoning}"'
                 ),
             )
+            ctx.notify()
             return
     single_object_scores = [r.normalized_score for r in single_object_results]
 
@@ -56,6 +57,7 @@ async def _score_single_render(
 
     all_scores = single_object_scores + edit_scores
     render.render_quality_score = sum(all_scores) / len(all_scores)
+    ctx.notify()
 
 
 async def score_all_renders(ctx: RunContext) -> None:

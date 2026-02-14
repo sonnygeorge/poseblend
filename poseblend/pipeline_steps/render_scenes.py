@@ -112,6 +112,7 @@ async def _render_single_scene(
             )
             for i, r in enumerate(manifest["renders"])
         ]
+        ctx.notify()
         manifest_path.unlink()
     finally:
         Path(tmp_file.name).unlink()

@@ -89,10 +89,10 @@ async def _check_requirements(
 
 async def _run_single_edit_chain(
     ctx: RunContext,
-    render: SceneRender,
+    edit_chain: EditChain,
     chain_idx: int,
     chain_seed: int | None,
-) -> EditChain:
+) -> None:
     config = ctx.run_data.config
     scene_spec = ctx.run_data.scene_spec
     max_attempts = config.max_edit_attempts
@@ -104,12 +104,7 @@ async def _run_single_edit_chain(
     unique_objects = sorted(set(scene_spec.role_assignments.values()))
     objects_str = grammatical_join([f"the {obj}" for obj in unique_objects])
 
-    edit_chain = EditChain(
-        starting_render_path=render.image_path,
-        edits=[],
-        final_img_path=None,
-    )
-    current_img_path = render.image_path
+    current_img_path = edit_chain.starting_render_path
     accumulated_edit_reqs: list[str] = []
     tick = 0
 
@@ -158,10 +153,13 @@ async def _run_single_edit_chain(
             seed=attempt_seed,
             before_img_path=current_img_path,
             after_img_path=after_path,
-            critic_invocations=invocations,
+            prompt_used=prompt,
             model_used=model_name,
+            critic_invocations=invocations,
+            
             gate_decision=decision,
         ))
+        ctx.notify()
 
         if decision.is_passing:
             current_img_path = after_path
@@ -182,7 +180,8 @@ async def _run_single_edit_chain(
                 f"Last failure: {bg_attempts[-1].gate_decision.reason}"
             ),
         )
-        return edit_chain
+        ctx.notify()
+        return
 
     # --- Edits 1..N: Localized edits ---
     for edit_idx, (edit_spec, edit_reqs) in enumerate(
@@ -228,10 +227,12 @@ async def _run_single_edit_chain(
                 seed=attempt_seed,
                 before_img_path=current_img_path,
                 after_img_path=after_path,
-                critic_invocations=invocations,
+                prompt_used=prompt,
                 model_used=model_name,
+                critic_invocations=invocations,
                 gate_decision=decision,
             ))
+            ctx.notify()
 
             if decision.is_passing:
                 current_img_path = after_path
@@ -253,14 +254,15 @@ async def _run_single_edit_chain(
                     f"Last failure: {edit_attempts[-1].gate_decision.reason}"
                 ),
             )
-            return edit_chain
+            ctx.notify()
+            return
 
     edit_chain.final_img_path = current_img_path
     edit_chain.gate_decision = GateDecision(
         is_passing=True,
         reason="All edits completed successfully",
     )
-    return edit_chain
+    ctx.notify()
 
 
 async def perform_all_edits(
@@ -268,20 +270,33 @@ async def perform_all_edits(
     selected_renders: list[SceneRender],
 ) -> None:
     chain_seeds = derive_seeds(ctx.run_data.config.seed, len(selected_renders))
-    edit_chains = await asyncio.gather(*[
-        _run_single_edit_chain(ctx, render, chain_idx, seed)
-        for chain_idx, (seed, render) in enumerate(zip(chain_seeds, selected_renders))
+    # Eagerly create edit chains on run_data so GUI can see them immediately
+    ctx.run_data.edit_chains = [
+        EditChain(starting_render_path=render.image_path, edits=[], final_img_path=None)
+        for render in selected_renders
+    ]
+    ctx.notify()
+
+    await asyncio.gather(*[
+        _run_single_edit_chain(ctx, edit_chain, chain_idx, seed)
+        for chain_idx, (seed, edit_chain) in enumerate(
+            zip(chain_seeds, ctx.run_data.edit_chains)
+        )
     ])
-    ctx.run_data.edit_chains = list(edit_chains)
 
     # Copy successful final images to a dedicated directory
     final_imgs_dir = ctx.run_data.run_dir / "final_imgs"
     final_imgs_dir.mkdir(parents=True, exist_ok=True)
-    for chain_idx, ec in enumerate(edit_chains):
+    for chain_idx, ec in enumerate(ctx.run_data.edit_chains):
         if ec.gate_decision and ec.gate_decision.is_passing and ec.final_img_path:
             dest = final_imgs_dir / f"chain_{chain_idx}.png"
             shutil.copy2(ec.final_img_path, dest)
 
-    n_success = sum(1 for ec in edit_chains if ec.gate_decision and ec.gate_decision.is_passing)
-    n_fail = sum(1 for ec in edit_chains if ec.gate_decision and not ec.gate_decision.is_passing)
+    n_success = sum(
+        1 for ec in ctx.run_data.edit_chains if ec.gate_decision and ec.gate_decision.is_passing
+    )
+    n_fail = sum(
+        1 for ec in ctx.run_data.edit_chains
+        if ec.gate_decision and not ec.gate_decision.is_passing
+    )
     logger.info(f"Edit chains complete: {n_success} succeeded, {n_fail} failed")

@@ -220,3 +220,7 @@ __marimo__/
 
 # Outputs
 outputs/
+
+# Node / frontend
+node_modules/
+gui/dist/
