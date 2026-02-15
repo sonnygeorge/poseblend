@@ -41,7 +41,7 @@ async def run_poseblend(
         BlenderScene(scene_id=i + 1, seed=seed, params=params)
         for i, (params, seed) in enumerate(zip(params_list, scene_seeds))
     ]
-    ctx.notify()
+    ctx.on_run_data_changed()
     # Render all blender scenes (spawns blender subprocesses)
     step_start = time.time()
     await render_all_scenes(ctx)
@@ -62,11 +62,10 @@ async def run_poseblend(
         selected_renders = select_renders(ctx)
     except NoSceneGoodEnoughError as e:
         logger.error(f"Pipeline stopped: {e}")
-        run_data.save()
-        ctx.notify()
+        ctx.on_run_data_changed()
         logger.info(f"Total elapsed time: {time.time() - run_start:.2f}s")
         return run_data
-    ctx.notify()
+    ctx.on_run_data_changed()
     # Perform edits on selected renders
     step_start = time.time()
     await perform_all_edits(ctx, selected_renders)
@@ -74,7 +73,5 @@ async def run_poseblend(
         f"Performed edits on {len(selected_renders)} edit chains "
         f"in {time.time() - step_start:.2f}s (total elapsed: {time.time() - run_start:.2f}s)"
     )
-    # Save run data
-    run_data.save()
     logger.info(f"Total elapsed time: {time.time() - run_start:.2f}s")
     return run_data

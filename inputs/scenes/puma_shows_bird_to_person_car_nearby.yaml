@@ -10,7 +10,7 @@ localized_edits:
       - shower
       - shown
     requirements:
-      - "{shower}'s body is oriented towards {shown_to}."
+      - "{shower}'s is more or less oriented towards {shown_to}."
       - "{shower}'s gaze is looking at {shown}."
       - "{shower}'s arm is outstretched."
       - "{shown} is perched on {shower}'s arm."

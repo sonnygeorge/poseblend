@@ -38,3 +38,4 @@ class RenderJob:
     resolution_y: int
     camera_fov_degrees: float
     seed: int | None = None
+    save_blend_file: bool = False

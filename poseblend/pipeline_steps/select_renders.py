@@ -73,6 +73,24 @@ def select_renders(ctx: RunContext) -> list[SceneRender]:
         )
 
     selected = ranked_passing[: config.num_edit_chains]
+    for render in selected:
+        render.gate_decision = GateDecision(
+            is_passing=True,
+            reason=(
+                f"Render quality score of {render.render_quality_score:.3f} "
+                f"met the {threshold} threshold and was in the top "
+                f"{config.num_edit_chains} score(s)"
+            ),
+        )
+    for render in ranked_passing[config.num_edit_chains:]:
+        render.gate_decision = GateDecision(
+            is_passing=False,
+            reason=(
+                f"Render quality score of {render.render_quality_score:.3f} "
+                f"met the {threshold} threshold but was not in the top "
+                f"{config.num_edit_chains} scoring render(s)"
+            ),
+        )
     logger.info(
         f"Selected {len(selected)}/{len(best_scene.renders)} renders for editing from "
         f"scene {best_scene.scene_id} (scores: "

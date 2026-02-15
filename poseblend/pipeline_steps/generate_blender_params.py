@@ -16,7 +16,8 @@ def _build_messages(run_data: RunData) -> list[Message]:
         f"  {role} -> {obj}" for role, obj in run_data.scene_spec.role_assignments.items()
     )
 
-    relevant_object_names = set(run_data.scene_spec.role_assignments.values())
+    # NOTE: Sorting for deterministic output
+    relevant_object_names = sorted(set(run_data.scene_spec.role_assignments.values()))
     object_lines = []
     for name in relevant_object_names:
         meta = run_data.blender_object_registry.objects[name]

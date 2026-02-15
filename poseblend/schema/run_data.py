@@ -24,8 +24,8 @@ class AttemptedEdit(BaseModel):
     seed: int | None
     before_img_path: Path
     after_img_path: Path
-    prompt_used: str
-    model_used: str
+    prompt_used: str | None
+    model_used: str | None
     critic_invocations: list[CriticInvocation]
     gate_decision: GateDecision
 
@@ -33,7 +33,8 @@ class AttemptedEdit(BaseModel):
 class EditChain(BaseModel):
     starting_render_path: Path
     edits: list[list[AttemptedEdit]]
-    final_img_path: Path | None
+    candidate_final_img_path: Path | None
+    final_critic_invocations: list[CriticInvocation] = Field(default_factory=list)
     gate_decision: GateDecision | None = None
 
 

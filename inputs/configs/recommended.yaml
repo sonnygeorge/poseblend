@@ -1,6 +1,6 @@
-num_blender_scenes: 4
-num_renders: 8
-num_edit_chains: 6
+num_blender_scenes: 2
+num_renders: 6
+num_edit_chains: 2
 min_render_quality_score: 0.6
 max_edit_attempts: 3
 max_concurrent_inference_requests: 10
@@ -15,7 +15,8 @@ blender_lm: "gpt-5.2-2025-12-11"
 blender_lm_temperature: 1.0
 critic_vlm: "gpt-5.2-2025-12-11"
 critic_vlm_temperature: 0.8
-# seed: 42
+save_blend_files: false
+seed: 42
 single_object_check_threshold: 0.4
 edit_model_selection_schedule:
   - from_attempt: 1
@@ -33,24 +34,24 @@ edit_model_selection_schedule:
       "fal-ai/hunyuan-image/v3/instruct/edit": 0.2
       "fal-ai/gemini-25-flash-image/edit": 0.2
 background_strs:
-  - "sandy background"
-  - "visually minimal empty green landscape background"
-  - "grassy background"
-  - "empty open industrial space background"
-  - "snowy background"
-  - "plain grassy field background"
-  - "empty cracked dry lake bed background"
-  - "empty tundra background"
-  - "open empty landscape background"
-  - "empty hangar background"
-  - "empty city park background"
-  - "empty indoor tiled space background"
-  - "empty parking lot background"
-  - "empty gravelled area background"
-  - "empty industrial space with concrete floor background"
-  - "plain grassy background"
-  - "visually minimal empty warehouse background"
-  - "empty indoor brick floor space background"
-  - "visually minimal flat arid desert background"
-  - "empty commercial office space background"
-  - "empty minimal skate park background"
+  - "sandy"
+  - "visually minimal empty green landscape"
+  - "grassy"
+  - "empty open industrial space"
+  - "snowy"
+  - "plain grassy field"
+  - "empty cracked dry lake bed"
+  - "empty tundra"
+  - "open empty landscape"
+  - "empty hangar"
+  - "empty city park"
+  - "empty indoor tiled space"
+  - "empty parking lot"
+  - "empty gravelled area"
+  - "empty industrial space with concrete floor"
+  - "plain grassy"
+  - "visually minimal empty warehouse"
+  - "empty indoor brick floor space"
+  - "visually minimal flat arid desert"
+  - "empty commercial office space"
+  - "empty minimal skate park"

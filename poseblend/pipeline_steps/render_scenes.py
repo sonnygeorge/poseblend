@@ -59,6 +59,7 @@ def _build_render_job(
         resolution_y=config.render_resolution_y,
         camera_fov_degrees=config.camera_fov_degrees,
         seed=scene.seed,
+        save_blend_file=config.save_blend_files,
     )
     return asdict(job)
 
@@ -103,7 +104,8 @@ async def _render_single_scene(
 
         manifest = json.loads(manifest_path.read_text())
 
-        scene.blend_file_path = Path(manifest["blend_file_path"])
+        blend_path = manifest.get("blend_file_path")
+        scene.blend_file_path = Path(blend_path) if blend_path else None
         scene.renders = [
             SceneRender(
                 render_id=i + 1,
@@ -112,7 +114,7 @@ async def _render_single_scene(
             )
             for i, r in enumerate(manifest["renders"])
         ]
-        ctx.notify()
+        ctx.on_run_data_changed()
         manifest_path.unlink()
     finally:
         Path(tmp_file.name).unlink()

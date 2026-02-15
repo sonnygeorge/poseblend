@@ -52,6 +52,7 @@ def render_scene(job: RenderJob) -> dict:
 
     render_args = bpy.context.scene.render
     render_args.engine = RENDER_ENGINE
+    bpy.context.scene.cycles.seed = (job.seed or 0) % 2_147_483_647  # Keep in int32 range
     render_args.film_transparent = False
 
     # Set up world environment lighting (grey ambient light)
@@ -160,9 +161,11 @@ def render_scene(job: RenderJob) -> dict:
             "mask_dir_path": render_mask_dir,
         })
 
-    # Save the .blend file
-    blend_path = str(output_dir / "scene.blend")
-    bpy.ops.wm.save_as_mainfile(filepath=blend_path)
+    # Optionally save the .blend file
+    blend_path = None
+    if job.save_blend_file:
+        blend_path = str(output_dir / "scene.blend")
+        bpy.ops.wm.save_as_mainfile(filepath=blend_path)
 
     # Write manifest
     manifest = {

@@ -46,6 +46,7 @@
           <span class="chain-label">Chain {chainIdx}</span>
 
           <ImageCard
+            cardKey={`chain-${chainIdx}-starting-render`}
             imageSrc={imageUrl(chain.starting_render_path, runId)}
             gateDecision={{ is_passing: true, reason: "Selected render" }}
             metadata={{ gateDecision: { is_passing: true, reason: "Selected render" } }}
@@ -63,13 +64,17 @@
             </div>
           {/each}
 
-          {#if chain.final_img_path}
+          {#if chain.candidate_final_img_path}
             <div class="final-row">
               <span class="edit-label">Final</span>
               <ImageCard
-                imageSrc={imageUrl(chain.final_img_path, runId)}
+                cardKey={`chain-${chainIdx}-final`}
+                imageSrc={imageUrl(chain.candidate_final_img_path, runId)}
                 gateDecision={chain.gate_decision}
-                metadata={{ gateDecision: chain.gate_decision }}
+                metadata={{
+                  gateDecision: chain.gate_decision,
+                  criticInvocations: chain.final_critic_invocations,
+                }}
               />
             </div>
           {/if}

@@ -1,3 +1,4 @@
+import builtins
 import base64
 import json
 import mimetypes
@@ -65,7 +66,7 @@ def sample_from_discrete_distribution(
     return rng.choices(keys, weights=weights, k=1)[0]
 
 
-def grammatical_join(items: list[str]) -> str:
+def list_grammatically(items: list[str], enumerate: bool = False) -> str:
     """Join strings into a grammatical, sentence-insertable listing.
 
     Examples:
@@ -75,7 +76,15 @@ def grammatical_join(items: list[str]) -> str:
         'foo and bar'
         >>> grammatical_join(["foo", "bar", "fizz"])
         'foo, bar, and fizz'
+        >>> grammatical_join(["foo"], enumerate=True)
+        '(1) foo'
+        >>> grammatical_join(["foo", "bar"], enumerate=True)
+        '(1) foo and (2) bar'
+        >>> grammatical_join(["foo", "bar", "fizz"], enumerate=True)
+        '(1) foo, (2) bar, and (3) fizz'
     """
+    if enumerate:
+        items = [f"({i}) {item}" for i, item in builtins.enumerate(items, 1)]
     if len(items) <= 2:
         return " and ".join(items)
     return ", ".join(items[:-1]) + f", and {items[-1]}"
@@ -101,7 +110,7 @@ async def download_image(url: str, save_path: Path) -> Path:
 def build_single_object_requirements(ctx: "RunContext") -> list[str]:
     unique_objects = sorted(set(ctx.run_data.scene_spec.role_assignments.values()))
     return [
-        f"A single {obj} is visible in the image." for obj in unique_objects
+        f"A single {obj} is visible in the image and it isn't mangled/malformed." for obj in unique_objects
     ]
 
 
@@ -109,6 +118,7 @@ async def invoke_critic(
     ctx: "RunContext",
     image_path: str | os.PathLike,
     requirement: str,
+    seed: int | None = None,
 ) -> CriticResult:
     vlm = ctx.get_vlm(ctx.run_data.config.critic_vlm)
     image_uri = image_path_to_data_uri(image_path)
@@ -132,4 +142,5 @@ async def invoke_critic(
         messages=messages,
         response_model=CriticResult,
         temperature=ctx.run_data.config.critic_vlm_temperature,
+        **({"seed": seed} if seed is not None else {}),
     )

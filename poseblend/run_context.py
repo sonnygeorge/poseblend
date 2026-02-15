@@ -19,7 +19,8 @@ class RunContext:
             run_data.config.max_concurrent_blender_processes
         )
 
-    def notify(self):
+    def on_run_data_changed(self):
+        self.run_data.save()
         if self._on_update is not None:
             self._on_update()
 

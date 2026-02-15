@@ -27,5 +27,6 @@ class PoseBlendConfig(BaseModel):
     critic_vlm_temperature: float
     seed: int | None = None
     single_object_check_threshold: float
+    save_blend_files: bool = False
     edit_model_selection_schedule: list[AttemptRangeModelSelectionProbs]
     background_strs: list[str]

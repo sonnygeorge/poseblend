@@ -224,3 +224,6 @@ outputs/
 # Node / frontend
 node_modules/
 gui/dist/
+
+# macOS
+.DS_Store

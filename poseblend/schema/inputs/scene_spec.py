@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class LocalizedEditSpec(BaseModel):
@@ -32,15 +32,18 @@ class PoseBlendSceneSpec(BaseModel):
     action: str
     role_assignments: dict[str, str]
     localized_edits: list[LocalizedEditSpec]
+    final_requirements: list[str] = Field(default_factory=list)
+
+    def _hydrate_requirement(self, template: str) -> str:
+        strs_by_role = {k: f"the {v}" for k, v in self.role_assignments.items()}
+        hydrated = template.format(**strs_by_role)
+        return hydrated[0].upper() + hydrated[1:]
 
     def get_hydrated_edit_requirements(self) -> list[list[str]]:
-        strs_by_role = {k: f"the {v}" for k, v in self.role_assignments.items()}
-        result = []
-        for edit in self.localized_edits:
-            hydrated_reqs = []
-            for req in edit.requirements:
-                hydrated = req.format(**strs_by_role)
-                hydrated = hydrated[0].upper() + hydrated[1:]
-                hydrated_reqs.append(hydrated)
-            result.append(hydrated_reqs)
-        return result
+        return [
+            [self._hydrate_requirement(req) for req in edit.requirements]
+            for edit in self.localized_edits
+        ]
+
+    def get_hydrated_final_requirements(self) -> list[str]:
+        return [self._hydrate_requirement(req) for req in self.final_requirements]
