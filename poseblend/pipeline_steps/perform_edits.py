@@ -57,7 +57,7 @@ def _build_localized_edit_prompt(objects_to_edit_str: str, requirements: list[st
     requirements_str = list_grammatically(requirements, enumerate=True)
     return (
         f"Keeping everything else THE EXACT SAME, update the physical state(s)/pose(s) of ONLY" 
-        f" {objects_to_edit_str} (as needed) without changing its/their size or location " 
+        f" {objects_to_edit_str} without changing its/their size or location " 
         f"such that: {requirements_str}"
     )
 
