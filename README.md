@@ -2,13 +2,11 @@
 
 PoseBlend: Compositional Action Scenes via Critic-Gated Localized Pose Editing of Blender Renders
 
-## Motivation
+> Text-to-image models perform well on common scenes but struggle with long-tail and out-of-distribution compositions. In particular, they fail to generate complex action scenes in which multiple entities must assume coherent roles, spatial relationships, and physically plausible poses—especially in rare configurations underrepresented in training data. We propose PoseBlend, an open-source image generation pipeline that (1) arranges and renders scenes of arbitrary Blender objects and (2) applies critic-gated localized diffusion edits to introduce realistic backgrounds and iteratively refine object poses. We demonstrate the system on atypical action-role configurations and show that PoseBlend consistently outperforms <SOTA MODEL>, achieving an <NUMBER>\% improvement in mean VQA score. Beyond improving generation quality, PoseBlend enables controlled synthesis of rare and parameterized action-role configurations, supporting synthetic data augmentation and systematic study of compositional generalization in vision-language models. The system is modular, model-agnostic, and released for reproducible research.
 
-- One interesting flavor of scene compositionality is how actions compose with their role arguments.
-- In this regard, T2I models are known to struggle with:
-  1. Asymmetric bias in role assignments
-  2. 3-or-more-argument action compositions (e.g., ditransitive verbs) with atypical arguments
-- We propose a semi-procedural generation pipeline to controllably generate images of such scenes.
+## How does it work?
+
+![PoseBlend Pipeline](static/poseblend_flowchart.png)
 
 ## Running PoseBlend
 
@@ -54,9 +52,15 @@ reopen the tab to ensure the new assets are loaded.
 
 ## Inputs
 
+To run, PoseBlend requires three things:
+
+1. An input scene specification
+2. A configuration of hyperparameters
+3. A registry/repository of usable Blender objects
+
 ### Scene Specs
 
-(specified by a human in YAML format)
+Input scene specifications are lists of visual requirements that double as a sequence of localized edits to be made once the objects have been spatially arranged and rendered in Blender.
 
 ```yaml
 ... TODO: Paste example here
@@ -73,30 +77,3 @@ reopen the tab to ensure the new assets are loaded.
 ### Blender Object Registry
 
 TODO: ...
-
-## Poseblend Pipeline Logic
-
-### Step 1: Generate Blender Scene Renders
-
-1. Generate $n_{bs}$ blender scene params
-2. For each:
-    - Setup a blender scene
-    - Render $n_p$ povs, calculating segment boundaries for each edit region
-3. Get `render_quality_scores` for all renders
-4. Select top $k$ renders from blender scene w/ highest mean `render_quality_score`
-5. Error out if mean `render_quality_score` of these top $k$ renders is less than $t_r$
-
-### Step 2: Apply Localized Edits To Get Final Images
-
-1. For each render:
-    - for i in `max_edit_attempts`:
-        - Do background edit
-        - Perform background edit requirement checks and as soon as one fails, either continue to next edit attempt or, if on last attempt, mark render as failure and abandon editing it further.
-        - If all checks pass, break.
-    - For each localized edit:
-        - Do this edit's requirements pass? If yes, continue (no need to apply edit)
-        - For i in `max_edit_attempts`:
-            - Apply edit (using drawn-on segmentation boundary?)
-            - Loop through accumulating requirement checks and as soon as one fails, either continue to next edit attempt or, if on last attempt, mark render as failure and abandon editing it.
-            - If all checks pass, break and continue to next edit.
-    - If all edits successful, save last edited image as final image.
