@@ -1,0 +1,15 @@
+scene_as_natural_language: A horse rides an astronaut.
+action: rides
+role_assignments:
+  rider: horse
+  ridden: astronaut
+localized_edits:
+  - region_contains:
+      - ridden
+    requirements:
+      - "{ridden} is on all fours (crawling position)"
+  - region_contains:
+      - rider
+      - ridden
+    requirements:
+      - "all four hooves of {rider} are close together on {ridden}'s back—i.e., they are standing on them."

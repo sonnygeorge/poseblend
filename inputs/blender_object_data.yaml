@@ -19,11 +19,6 @@ objects:
     file: bird.blend
     scale_factor: 0.026
     default_facing_orientation: [0.0, 0.0, 3.1416]
-  bookshelf:
-    name: bookshelf
-    file: bookshelf.blend
-    scale_factor: 0.33
-    default_facing_orientation: [0.0, 0.0, 1.5708]
   bottle:
     name: bottle
     file: bottle.blend
@@ -78,6 +73,26 @@ objects:
     name: person
     file: person.blend
     scale_factor: 0.65
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  horse:
+    name: horse
+    file: horse.blend
+    scale_factor: 0.81
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  cat:
+    name: cat
+    file: cat.blend
+    scale_factor: 0.7
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  mouse:
+    name: mouse
+    file: mouse.blend
+    scale_factor: 0.053
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  astronaut:
+    name: astronaut
+    file: astronaut.blend
+    scale_factor: 0.195
     default_facing_orientation: [0.0, 0.0, 4.7124]
   puma:
     name: puma

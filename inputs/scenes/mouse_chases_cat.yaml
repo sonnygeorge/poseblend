@@ -1,0 +1,16 @@
+scene_as_natural_language: A mouse chases a cat.
+action: chases
+role_assignments:
+  chaser: mouse
+  chased: cat
+localized_edits:
+  - region_contains:
+      - chaser
+    requirements:
+      - "{chaser}'s legs are actively and dynamically outstretched between strides while running with a seemingly urgent pace"
+      - "directionally, {chaser} is running towards {chased}"
+  - region_contains:
+      - chased
+    requirements:
+      - "{chased}'s legs are actively and dynamically outstretched between strides while running with a seemingly urgent pace"
+      - "directionally, {chased} is running away from {chaser}"

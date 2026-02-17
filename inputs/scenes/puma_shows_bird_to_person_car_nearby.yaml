@@ -1,9 +1,9 @@
 scene_as_natural_language: A puma shows a bird to a person. A car is nearby.
 action: shows
 role_assignments:
-  shower: puma
+  shower: cat
   shown: bird
-  shown_to: person
+  shown_to: astronaut
   nearby: car
 localized_edits:
   - region_contains:

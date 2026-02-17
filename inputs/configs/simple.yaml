@@ -1,7 +1,7 @@
 num_blender_scenes: 1
 num_renders: 8
 num_edit_chains: 7
-min_render_quality_score: 0.6
+min_render_quality_score: 0.5
 max_edit_attempts: 3
 max_concurrent_inference_requests: 10
 max_concurrent_blender_processes: 3

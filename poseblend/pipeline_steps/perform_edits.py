@@ -27,7 +27,10 @@ from poseblend.utils import (
 
 EDIT_REQUIREMENT_PASS_THRESHOLD = 0.75  # Likert >= 4 (mostly/clearly satisfied)
 BG_ONLY_REQS = [
-    "There is nothing utterly and egregiously wrong about the perspective and geometries from the pov of the camera (a little bit of surrealness is fine)."
+    "There is nothing utterly and egregiously wrong about the perspective from the pov of "
+    "the camera. (DO NOT worry about the plausibility of spatial relationships b/w "
+    "objects! Things can be in weird positions w.r.t. each other. However, if object "
+    "scale and perspective geometries are seriously messed up, that's a problem.)"
 ]
 
 
