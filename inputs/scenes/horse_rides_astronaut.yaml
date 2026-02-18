@@ -7,9 +7,9 @@ localized_edits:
   - region_contains:
       - ridden
     requirements:
-      - "{ridden} is on all fours (crawling position)"
+      - "{ridden} is on all fours (crawling position) with their back more or less parallel to the ground"
   - region_contains:
       - rider
       - ridden
     requirements:
-      - "all four hooves of {rider} are close together on {ridden}'s back—i.e., they are standing on them."
+      - "all hooves of {rider} are close together on {ridden}'s back—i.e., they are standing on them."

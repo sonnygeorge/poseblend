@@ -6,7 +6,9 @@ from pathlib import Path
 import bpy
 import numpy as np
 from mathutils import Vector
+from mathutils.bvhtree import BVHTree
 
+from poseblend.blender import config as cfg
 from poseblend.blender.schema import BlenderObjectSpec, ObjectPlacementParams
 
 
@@ -42,6 +44,77 @@ def compute_combined_bbox(objects: list[bpy.types.Object]) -> BoundingBox:
     return BoundingBox(center=center, corners=corners)
 
 
+def bbox_volume(obj: bpy.types.Object) -> float:
+    """Return the axis-aligned bounding box volume of a Blender object in world space."""
+    corners = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
+    xs = [v.x for v in corners]
+    ys = [v.y for v in corners]
+    zs = [v.z for v in corners]
+    return (max(xs) - min(xs)) * (max(ys) - min(ys)) * (max(zs) - min(zs))
+
+
+def build_bvh(obj: bpy.types.Object) -> BVHTree:
+    """Build a BVH tree from an object's evaluated mesh in world space."""
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    eval_obj = obj.evaluated_get(depsgraph)
+    mesh = eval_obj.to_mesh()
+    mesh.transform(obj.matrix_world)
+    tree = BVHTree.FromPolygons(
+        [v.co[:] for v in mesh.vertices],
+        [p.vertices[:] for p in mesh.polygons],
+    )
+    eval_obj.to_mesh_clear()
+    return tree
+
+
+def mesh_surface_distance(
+    tree_a: BVHTree, tree_b: BVHTree,
+    obj_a: bpy.types.Object, obj_b: bpy.types.Object,
+) -> tuple[float, Vector]:
+    """Compute the approximate minimum distance between two meshes using BVH trees.
+
+    Samples the vertices of each mesh and finds the closest surface point on the
+    other mesh's BVH. Returns (distance, direction_vector_from_a_to_b). This is
+    not an exact minimum but is fast and accurate enough for repulsion purposes.
+    """
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    best_dist = float("inf")
+    best_pt_a = Vector((0, 0, 0))
+    best_pt_b = Vector((0, 0, 0))
+
+    # Sample vertices of A, find closest surface point on B
+    eval_a = obj_a.evaluated_get(depsgraph)
+    mesh_a = eval_a.to_mesh()
+    for v in mesh_a.vertices:
+        world_co = obj_a.matrix_world @ v.co
+        location, _normal, _index, dist = tree_b.find_nearest(world_co)
+        if location is not None and dist < best_dist:
+            best_dist = dist
+            best_pt_a = world_co
+            best_pt_b = location
+    eval_a.to_mesh_clear()
+
+    # Sample vertices of B, find closest surface point on A
+    eval_b = obj_b.evaluated_get(depsgraph)
+    mesh_b = eval_b.to_mesh()
+    for v in mesh_b.vertices:
+        world_co = obj_b.matrix_world @ v.co
+        location, _normal, _index, dist = tree_a.find_nearest(world_co)
+        if location is not None and dist < best_dist:
+            best_dist = dist
+            best_pt_a = location
+            best_pt_b = world_co
+    eval_b.to_mesh_clear()
+
+    # Always push along center-to-center for a predictable repulsion direction,
+    # even though distance is measured surface-to-surface.
+    direction = obj_b.location - obj_a.location
+    if direction.length < 1e-9:
+        direction = Vector((1, 0, 0))
+
+    return best_dist, direction.normalized()
+
+
 def elevation_azimuth_to_unit_vector(elevation: float, azimuth: float) -> Vector:
     vec = Vector(
         (
@@ -58,6 +131,10 @@ def place_objects(
     placements: list[ObjectPlacementParams],
     objects_by_name: dict[str, BlenderObjectSpec],
 ) -> list[bpy.types.Object]:
+    """Load each object from its .blend file, scale it, position it at the target
+    location, and orient it. Objects marked touching_ground are snapped so their
+    lowest point sits on the Z=0 plane.
+    """
     placed: list[bpy.types.Object] = []
     for spec in placements:
         obj_spec = objects_by_name[spec.name]
@@ -104,6 +181,94 @@ def place_objects(
         bpy.ops.object.select_all(action="DESELECT")
         placed.append(selected_obj)
     return placed
+
+
+def adjust_object_positions(
+    placed_objects: list[bpy.types.Object],
+    placements: list[ObjectPlacementParams],
+    camera_fov_rads: float,
+    aspect_ratio: float,
+) -> None:
+    """Tighten the scene layout in three phases: (1) contract all positions toward
+    their centroid by a factor derived from how sparse the objects are relative to
+    their volumes, (2) push any pairs that ended up too close back apart so the
+    camera can see them without overlap, and (3) re-snap ground objects to Z=0.
+    """
+    if len(placed_objects) < 2:
+        return
+
+    # --- Phase 1: Contraction ---
+    centroid = Vector((0, 0, 0))
+    for obj in placed_objects:
+        centroid += obj.location
+    centroid /= len(placed_objects)
+
+    total_obj_volume = sum(bbox_volume(obj) for obj in placed_objects)
+    combined_bbox = compute_combined_bbox(placed_objects)
+    if not combined_bbox.corners:
+        return
+    cx = [v.x for v in combined_bbox.corners]
+    cy = [v.y for v in combined_bbox.corners]
+    cz = [v.z for v in combined_bbox.corners]
+    envelope_volume = (max(cx) - min(cx)) * (max(cy) - min(cy)) * (max(cz) - min(cz))
+
+    if envelope_volume > 0:
+        density = total_obj_volume / envelope_volume
+    else:
+        density = 1.0
+
+    s = max(cfg.S_MIN, min(density / cfg.DENSITY_THRESHOLD, 1.0))
+
+    print(f"[adjust] Phase 1: density={density:.4f}, contraction s={s:.4f}")  # noqa: T201
+    for obj in placed_objects:
+        old_loc = obj.location.copy()
+        obj.location = centroid + s * (obj.location - centroid)
+        delta = (obj.location - old_loc).length
+        print(f"  {obj.name}: moved {delta:.4f} units inward")  # noqa: T201
+
+    bpy.context.view_layer.update()
+
+    # --- Phase 2: Airspace enforcement via mesh surfaces ---
+    post_bbox = compute_combined_bbox(placed_objects)
+    min_cam_dist = min_camera_distance_for_bbox(
+        bbox=post_bbox,
+        camera_elevation=cfg.CAMERA_ELEVATION_MEAN_RADS,
+        camera_azimuth=0.0,
+        camera_fov_angle_rads=camera_fov_rads,
+        camera_aspect_ratio=aspect_ratio,
+    )
+    min_gap = cfg.AIRSPACE_FACTOR * min_cam_dist
+    print(f"[adjust] Phase 2: min_cam_dist={min_cam_dist:.4f}, min_gap={min_gap:.4f}")  # noqa: T201
+
+    for iteration in range(cfg.AIRSPACE_REPULSION_ITERATIONS):
+        # Rebuild BVH trees each iteration since positions may have shifted
+        bvh_trees = [build_bvh(obj) for obj in placed_objects]
+        for i in range(len(placed_objects)):
+            for j in range(i + 1, len(placed_objects)):
+                surface_dist, direction = mesh_surface_distance(
+                    bvh_trees[i], bvh_trees[j],
+                    placed_objects[i], placed_objects[j],
+                )
+                if surface_dist < min_gap:
+                    correction = (min_gap - surface_dist) / 2
+                    placed_objects[i].location -= direction * correction
+                    placed_objects[j].location += direction * correction
+                    print(  # noqa: T201
+                        f"  iter {iteration}: {placed_objects[i].name} <-> "
+                        f"{placed_objects[j].name}: surface_dist={surface_dist:.4f}, "
+                        f"pushed apart by {correction:.4f} each"
+                    )
+        bpy.context.view_layer.update()
+
+    bpy.context.view_layer.update()
+
+    # --- Phase 3: Ground re-snap ---
+    for obj, spec in zip(placed_objects, placements):
+        if spec.touching_ground:
+            bbox_corners = [obj.matrix_world @ Vector(c) for c in obj.bound_box]
+            snap_z = min(v.z for v in bbox_corners)
+            obj.location.z -= snap_z
+            print(f"[adjust] Phase 3: {obj.name} re-snapped by z={-snap_z:.4f}")  # noqa: T201
 
 
 def min_camera_distance_for_bbox(

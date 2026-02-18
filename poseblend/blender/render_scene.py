@@ -12,12 +12,14 @@ _src = Path(__file__).resolve().parent.parent.parent
 if str(_src) not in sys.path:
     sys.path.insert(0, str(_src))
 
+from poseblend.blender import config as cfg  # noqa: E402
 from poseblend.blender.schema import (  # noqa: E402
     BlenderObjectSpec,
     ObjectPlacementParams,
     RenderJob,
 )
 from poseblend.blender.utils import (  # noqa: E402
+    adjust_object_positions,
     compute_combined_bbox,
     elevation_azimuth_to_unit_vector,
     min_camera_distance_for_bbox,
@@ -25,17 +27,6 @@ from poseblend.blender.utils import (  # noqa: E402
     render_object_masks,
     save_masks,
 )
-
-MAX_CAMERA_ANGLE_SAMPLES = 50
-MAX_RENDER_ATTEMPTS = 5
-
-CAMERA_ELEVATION_MIN_RADS = math.radians(7.5)
-CAMERA_ELEVATION_MAX_RADS = math.radians(81)
-CAMERA_ELEVATION_MEAN_RADS = math.radians(34)
-CAMERA_ELEVATION_STD_RADS = math.radians(12)
-
-RENDER_ENGINE = "CYCLES"
-
 
 def _load_render_job(job_path: str) -> RenderJob:
     with open(job_path, "r") as f:
@@ -51,7 +42,7 @@ def render_scene(job: RenderJob) -> dict:
     bpy.ops.wm.open_mainfile(filepath=job.base_scene_path)
 
     render_args = bpy.context.scene.render
-    render_args.engine = RENDER_ENGINE
+    render_args.engine = cfg.RENDER_ENGINE
     bpy.context.scene.cycles.seed = (job.seed or 0) % 2_147_483_647  # Keep in int32 range
     render_args.film_transparent = False
 
@@ -67,11 +58,18 @@ def render_scene(job: RenderJob) -> dict:
     bg_node.inputs["Color"].default_value = (0.5, 0.5, 0.5, 1)
     bg_node.inputs["Strength"].default_value = 1.0
 
+    # Compute camera params early (needed by adjust_object_positions)
+    camera_fov_rads = math.radians(job.camera_fov_degrees)
+    aspect_ratio = job.resolution_x / job.resolution_y
+
     # Build object lookup from job specs
     objects_by_name = {obj.name: obj for obj in job.objects}
 
     # Place objects
     placed_objects = place_objects(job.placements, objects_by_name)
+
+    # Contract positions toward centroid & enforce airspace between objects
+    adjust_object_positions(placed_objects, job.placements, camera_fov_rads, aspect_ratio)
 
     # Ensure all placed objects are visible and in scene collection
     scene_collection = bpy.context.scene.collection
@@ -84,12 +82,10 @@ def render_scene(job: RenderJob) -> dict:
     bbox_all = compute_combined_bbox(placed_objects)
 
     # Setup camera
-    camera_fov_rads = math.radians(job.camera_fov_degrees)
     camera = bpy.data.objects["Camera"]
     camera.data.angle = camera_fov_rads
     render_args.resolution_x = job.resolution_x
     render_args.resolution_y = job.resolution_y
-    aspect_ratio = job.resolution_x / job.resolution_y
     render_args.resolution_percentage = 100
     camera.rotation_mode = "XYZ"
 
@@ -108,11 +104,11 @@ def render_scene(job: RenderJob) -> dict:
         # Try to find a camera angle with no visual overlap between objects
         masks: list[np.ndarray] = []
         found_usable_angle = False
-        for _attempt in range(MAX_CAMERA_ANGLE_SAMPLES):
+        for _attempt in range(cfg.MAX_CAMERA_ANGLE_SAMPLES):
             elevation = float(np.clip(
-                rng.normal(CAMERA_ELEVATION_MEAN_RADS, CAMERA_ELEVATION_STD_RADS),
-                CAMERA_ELEVATION_MIN_RADS,
-                CAMERA_ELEVATION_MAX_RADS,
+                rng.normal(cfg.CAMERA_ELEVATION_MEAN_RADS, cfg.CAMERA_ELEVATION_STD_RADS),
+                cfg.CAMERA_ELEVATION_MIN_RADS,
+                cfg.CAMERA_ELEVATION_MAX_RADS,
             ))
             azimuth = float(rng.uniform(-math.pi, math.pi))
             min_distance = min_camera_distance_for_bbox(
@@ -137,7 +133,7 @@ def render_scene(job: RenderJob) -> dict:
         if not found_usable_angle:
             print(  # noqa: T201
                 f"WARNING: Failed to find non-overlapping camera angle for render {render_id} "
-                f"after {MAX_CAMERA_ANGLE_SAMPLES} attempts. Using last sampled angle."
+                f"after {cfg.MAX_CAMERA_ANGLE_SAMPLES} attempts. Using last sampled angle."
             )
 
         # Save masks
@@ -147,14 +143,14 @@ def render_scene(job: RenderJob) -> dict:
         # Render final image
         render_path = str(renders_dir / f"{render_id}.png")
         render_args.filepath = render_path
-        for attempt in range(MAX_RENDER_ATTEMPTS):
+        for attempt in range(cfg.MAX_RENDER_ATTEMPTS):
             try:
                 bpy.ops.render.render(write_still=True)
                 break
             except Exception as e:  # noqa: BLE001
-                print(f"Render attempt {attempt + 1}/{MAX_RENDER_ATTEMPTS} failed: {e}")  # noqa: T201
+                print(f"Render attempt {attempt + 1}/{cfg.MAX_RENDER_ATTEMPTS} failed: {e}")  # noqa: T201
         else:
-            print(f"Gave up after {MAX_RENDER_ATTEMPTS} render attempts for render {render_id}.")  # noqa: T201
+            print(f"Gave up after {cfg.MAX_RENDER_ATTEMPTS} render attempts for render {render_id}.")  # noqa: T201
 
         manifest_renders.append({
             "image_path": render_path,

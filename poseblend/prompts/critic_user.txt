@@ -1,3 +1,3 @@
 Requirement: {requirement}
 
-Score how well this requirement is satisfied in the image. Don't be too pedantic about highly nitpicky semantic details.
+Score how well this requirement is satisfied in the image. DO NOT be overly pedantic about _subjective_ adjectives (like "beautiful") and other unnecessarily nitpicky details. However, do pay attention to directional relationships and other objective things.

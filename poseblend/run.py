@@ -7,6 +7,7 @@ from poseblend.exceptions import NoSceneGoodEnoughError
 from poseblend.pipeline_steps.generate_blender_params import generate_blender_params
 from poseblend.pipeline_steps.render_scenes import render_all_scenes
 from poseblend.pipeline_steps.perform_edits import perform_all_edits
+from poseblend.pipeline_steps.postprocess_renders import postprocess_all_renders
 from poseblend.pipeline_steps.score_renders import score_all_renders
 from poseblend.pipeline_steps.select_renders import select_renders
 from poseblend.run_context import RunContext
@@ -48,6 +49,14 @@ async def run_poseblend(
     total_renders = n_scenes * n_renders
     logger.info(
         f"Rendered {total_renders} renders ({n_renders} renders for {n_scenes} scenes) "
+        f"in {time.time() - step_start:.2f}s (total elapsed: {time.time() - run_start:.2f}s)"
+    )
+    # Crop renders tightly around objects and upscale back to original resolution
+    step_start = time.time()
+    postprocess_all_renders(ctx)
+    ctx.on_run_data_changed()
+    logger.info(
+        f"Post-processed {total_renders} renders "
         f"in {time.time() - step_start:.2f}s (total elapsed: {time.time() - run_start:.2f}s)"
     )
     # Score all renders via critic VLM

@@ -1,6 +1,7 @@
 import asyncio
 import json
 import os
+import re
 import sys
 import tempfile
 from dataclasses import asdict
@@ -14,6 +15,7 @@ from poseblend.schema.run_data import BlenderScene, SceneRender
 
 RENDER_SCRIPT_PATH = Path(__file__).resolve().parent.parent / "blender" / "render_scene.py"
 BLENDER_EXE_ENV_VAR = "BLENDER_EXE"
+_BLENDER_NOISE_RE = re.compile(r"^(Fra:\d|Saved: |Time: )")
 
 
 def _resolve_blender_exe() -> str:
@@ -87,9 +89,14 @@ async def _render_single_scene(
             "--background",
             "--python", str(RENDER_SCRIPT_PATH),
             "--", tmp_file.name,
-            stdout=sys.stdout,
+            stdout=asyncio.subprocess.PIPE,
             stderr=sys.stderr,
         )
+        async for raw_line in proc.stdout:
+            line = raw_line.decode("utf-8", errors="replace").rstrip("\n")
+            # Suppress Blender's noise output
+            if not _BLENDER_NOISE_RE.match(line):
+                print(line)  # noqa: T201
         await proc.wait()
 
         if proc.returncode != 0:
