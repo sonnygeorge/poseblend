@@ -26,6 +26,7 @@ from poseblend.utils import (
 )
 
 EDIT_REQUIREMENT_PASS_THRESHOLD = 0.75  # Likert >= 4 (mostly/clearly satisfied)
+EDIT_REQUIREMENT_RECHECK_THRESHOLD = 0.5  # Relaxed bar for previously-passed reqs
 BG_ONLY_REQS = [
     "There is nothing utterly and egregiously wrong about the perspective from the pov of "
     "the camera. (DO NOT worry about the plausibility of spatial relationships b/w "
@@ -108,7 +109,7 @@ async def _run_single_edit_chain(
     objects_str = list_grammatically([f"the {obj}" for obj in unique_objects])
 
     current_img_path = edit_chain.starting_render_path
-    accumulated_edit_reqs: list[str] = []
+    previously_passed_edit_reqs: list[str] = []
     tick = 0
 
     def _next_seed() -> int | None:
@@ -208,7 +209,6 @@ async def _run_single_edit_chain(
     for edit_idx, (edit_spec, edit_reqs) in enumerate(
         zip(scene_spec.localized_edits, hydrated_edit_reqs), start=1
     ):
-        accumulated_edit_reqs.extend(edit_reqs)
         edit_attempts: list[AttemptedEdit] = []
         edit_chain.edits.append(edit_attempts)
 
@@ -219,6 +219,7 @@ async def _run_single_edit_chain(
             base_seed=pre_check_seed,
         )
         if pre_decision.is_passing:
+            previously_passed_edit_reqs.extend(edit_reqs)
             combined_invocations = persisting_invocations_if_next_edit_skipped + pre_invocations
             edit_attempts.append(AttemptedEdit(
                 seed=None,
@@ -269,7 +270,8 @@ async def _run_single_edit_chain(
                 after_path,
                 [
                     (single_object_reqs, single_object_threshold),
-                    (accumulated_edit_reqs, EDIT_REQUIREMENT_PASS_THRESHOLD),
+                    (previously_passed_edit_reqs, EDIT_REQUIREMENT_RECHECK_THRESHOLD),
+                    (edit_reqs, EDIT_REQUIREMENT_PASS_THRESHOLD),
                 ],
                 base_seed=_sub_seed(attempt_seed, 3),
             )
@@ -286,6 +288,7 @@ async def _run_single_edit_chain(
 
             if decision.is_passing:
                 current_img_path = after_path
+                previously_passed_edit_reqs.extend(edit_reqs)
                 persisting_invocations_if_next_edit_skipped = invocations
                 logger.debug(
                     f"Edit chain {chain_idx}: localized edit {edit_idx} passed on "

@@ -188,6 +188,7 @@ def adjust_object_positions(
     placements: list[ObjectPlacementParams],
     camera_fov_rads: float,
     aspect_ratio: float,
+    contraction_strength: float = 1.0,
 ) -> None:
     """Tighten the scene layout in three phases: (1) contract all positions toward
     their centroid by a factor derived from how sparse the objects are relative to
@@ -217,7 +218,8 @@ def adjust_object_positions(
     else:
         density = 1.0
 
-    s = max(cfg.S_MIN, min(density / cfg.DENSITY_THRESHOLD, 1.0))
+    s_raw = max(cfg.S_MIN, min(density / cfg.DENSITY_THRESHOLD, 1.0))
+    s = max(cfg.S_MIN, 1.0 - contraction_strength * (1.0 - s_raw))
 
     print(f"[adjust] Phase 1: density={density:.4f}, contraction s={s:.4f}")  # noqa: T201
     for obj in placed_objects:

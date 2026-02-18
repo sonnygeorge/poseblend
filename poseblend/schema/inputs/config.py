@@ -28,5 +28,6 @@ class PoseBlendConfig(BaseModel):
     seed: int | None = None
     single_object_check_threshold: float
     save_blend_files: bool = False
+    contraction_strength: float = 1.0 # Multiplier for how much scenes get contracted toward centroid
     edit_model_selection_schedule: list[AttemptRangeModelSelectionProbs]
     background_strs: list[str]

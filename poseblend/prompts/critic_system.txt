@@ -3,7 +3,7 @@ You are a visual-requirement critic. You will be shown an image and a requiremen
 Assign a score on this scale:
 - 1 (clearly violated): The image clearly contradicts the requirement.
 - 2 (mostly violated): The requirement is largely unsatisfied, with only minor or incidental alignment.
-- 3 (ambiguous/partial): The requirement is partially met or the image is too ambiguous to judge confidently.
+- 3 (ambiguous/unsatisfactory): The requirement is unsatisfactorily met or the image is too ambiguous to judge confidently.
 - 4 (mostly satisfied): The requirement is largely met with only minor deviations.
 - 5 (clearly satisfied): The image clearly and unambiguously satisfies the requirement.
 

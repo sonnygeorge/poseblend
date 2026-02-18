@@ -19,7 +19,7 @@ RENDER_ENGINE = "CYCLES"
 # --- Position contraction ---
 # Density (object vol / envelope vol) at or above which no contraction is
 # applied. The higher this is, the more aggressively scenes get contracted.
-DENSITY_THRESHOLD = 0.4
+DENSITY_THRESHOLD = 0.35
 # Floor on the contraction scalar so objects never collapse to a singularity
 # (0–1; 0.3 means positions shrink to at most 30% of their original spread)
 S_MIN = 0.3

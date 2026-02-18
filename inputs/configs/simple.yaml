@@ -14,7 +14,7 @@ camera_fov_degrees: 60
 blender_lm: "gpt-5.2-2025-12-11"
 blender_lm_temperature: 1.0
 critic_vlm: "gpt-5.2-2025-12-11"
-critic_vlm_temperature: 0.8
+critic_vlm_temperature: 0.5
 # seed: 42
 single_object_check_threshold: 0.4
 edit_model_selection_schedule:

@@ -69,7 +69,9 @@ def render_scene(job: RenderJob) -> dict:
     placed_objects = place_objects(job.placements, objects_by_name)
 
     # Contract positions toward centroid & enforce airspace between objects
-    adjust_object_positions(placed_objects, job.placements, camera_fov_rads, aspect_ratio)
+    adjust_object_positions(
+        placed_objects, job.placements, camera_fov_rads, aspect_ratio, job.contraction_strength,
+    )
 
     # Ensure all placed objects are visible and in scene collection
     scene_collection = bpy.context.scene.collection

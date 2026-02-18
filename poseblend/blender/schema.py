@@ -39,3 +39,4 @@ class RenderJob:
     camera_fov_degrees: float
     seed: int | None = None
     save_blend_file: bool = False
+    contraction_strength: float = 1.0

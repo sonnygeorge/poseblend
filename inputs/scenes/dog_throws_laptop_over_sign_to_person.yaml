@@ -14,12 +14,11 @@ localized_edits:
       - thrown
     requirements:
       - "in terms of the scene itself (not necessarily the rendered image), {thrown} is airborne above {thrown_over}"
-      # - "Wind-mark motion trails that are subtle and short (in length) POINT BACK TOWARDS {thrower} behind {thrown}, indicating the immediate, lastmost portion of airspace that {thrown} has flown through"
-      - "Short wind-mark motion trails extend back from {thrown} in the direction of {thrower}, indicating the lastmost portion of airspace that {thrown} has flown through"
+      - "Short wind-mark motion trails extend back from {thrown} down in the direction of {thrower}, indicating the lastmost chunk (inches?) of airspace that {thrown} has flown through"
   - region_contains:
       - thrower
     requirements:
-      - "it looks like {thrower} just released/threw {thrown}—that is, the {thrower}'s pose is a throwing follow-through with at least one arm outstretched towards {thrown}"
+      - "the {thrower}'s pose corroborates that they just threw {thrown}—that is, the {thrower}'s pose is more or less a throwing follow-through with at least one arm extended out towards {thrown}"
   - region_contains:
       - thrown_to
     requirements:

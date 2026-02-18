@@ -1,6 +1,6 @@
 num_blender_scenes: 1
-num_renders: 5
-num_edit_chains: 5
+num_renders: 15
+num_edit_chains: 10
 min_render_quality_score: 0.5
 max_edit_attempts: 3
 max_concurrent_inference_requests: 10
@@ -14,9 +14,10 @@ camera_fov_degrees: 60
 blender_lm: "gpt-5.2-2025-12-11"
 blender_lm_temperature: 1.0
 critic_vlm: "gpt-5.2-2025-12-11"
-critic_vlm_temperature: 0.8
+critic_vlm_temperature: 0.5
+contraction_strength: 0.7
 save_blend_files: false
-seed: 42
+# seed: 42
 single_object_check_threshold: 0.4
 edit_model_selection_schedule:
   - from_attempt: 1
@@ -25,12 +26,12 @@ edit_model_selection_schedule:
       "fal-ai/hunyuan-image/v3/instruct/edit": 0.27
       "fal-ai/gpt-image-1.5/edit": 0.11
       "fal-ai/gemini-25-flash-image/edit": 0.4
-      "xai/grok-imagine-image/edit": 0.22
+      # "xai/grok-imagine-image/edit": 0.22
   - from_attempt: 3
     to_attempt: null
     model_probs:
       "fal-ai/nano-banana/edit": 0.4
-      "xai/grok-imagine-image/edit": 0.2
+      # "xai/grok-imagine-image/edit": 0.2
       "fal-ai/hunyuan-image/v3/instruct/edit": 0.2
       "fal-ai/gemini-25-flash-image/edit": 0.2
 background_strs:

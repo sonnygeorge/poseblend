@@ -62,6 +62,7 @@ def _build_render_job(
         camera_fov_degrees=config.camera_fov_degrees,
         seed=scene.seed,
         save_blend_file=config.save_blend_files,
+        contraction_strength=config.contraction_strength,
     )
     return asdict(job)
 
