@@ -28,6 +28,86 @@ from poseblend.blender.utils import (  # noqa: E402
     save_masks,
 )
 
+def _apply_grid_floor_material() -> None:
+    floor = bpy.data.objects.get(cfg.FLOOR_OBJECT_NAME)
+    if floor is None:
+        return
+
+    mat = bpy.data.materials.new("GridFloor")
+    mat.use_nodes = True
+    nodes = mat.node_tree.nodes
+    links = mat.node_tree.links
+    nodes.clear()
+
+    output = nodes.new("ShaderNodeOutputMaterial")
+    bsdf = nodes.new("ShaderNodeBsdfDiffuse")
+
+    tex_coord = nodes.new("ShaderNodeTexCoord")
+    sep_xyz = nodes.new("ShaderNodeSeparateXYZ")
+    links.new(tex_coord.outputs["Object"], sep_xyz.inputs["Vector"])
+
+    spacing = cfg.FLOOR_GRID_SPACING
+    line_w = cfg.FLOOR_GRID_LINE_WIDTH
+
+    # Wrap negative coords into [0, spacing) via ((x % s) + s) % s
+    mod_x1 = nodes.new("ShaderNodeMath")
+    mod_x1.operation = "MODULO"
+    mod_x1.inputs[1].default_value = spacing
+    links.new(sep_xyz.outputs["X"], mod_x1.inputs[0])
+
+    add_x = nodes.new("ShaderNodeMath")
+    add_x.operation = "ADD"
+    add_x.inputs[1].default_value = spacing
+    links.new(mod_x1.outputs[0], add_x.inputs[0])
+
+    mod_x2 = nodes.new("ShaderNodeMath")
+    mod_x2.operation = "MODULO"
+    mod_x2.inputs[1].default_value = spacing
+    links.new(add_x.outputs[0], mod_x2.inputs[0])
+
+    lt_x = nodes.new("ShaderNodeMath")
+    lt_x.operation = "LESS_THAN"
+    lt_x.inputs[1].default_value = line_w
+    links.new(mod_x2.outputs[0], lt_x.inputs[0])
+
+    mod_y1 = nodes.new("ShaderNodeMath")
+    mod_y1.operation = "MODULO"
+    mod_y1.inputs[1].default_value = spacing
+    links.new(sep_xyz.outputs["Y"], mod_y1.inputs[0])
+
+    add_y = nodes.new("ShaderNodeMath")
+    add_y.operation = "ADD"
+    add_y.inputs[1].default_value = spacing
+    links.new(mod_y1.outputs[0], add_y.inputs[0])
+
+    mod_y2 = nodes.new("ShaderNodeMath")
+    mod_y2.operation = "MODULO"
+    mod_y2.inputs[1].default_value = spacing
+    links.new(add_y.outputs[0], mod_y2.inputs[0])
+
+    lt_y = nodes.new("ShaderNodeMath")
+    lt_y.operation = "LESS_THAN"
+    lt_y.inputs[1].default_value = line_w
+    links.new(mod_y2.outputs[0], lt_y.inputs[0])
+
+    grid_mask = nodes.new("ShaderNodeMath")
+    grid_mask.operation = "MAXIMUM"
+    links.new(lt_x.outputs[0], grid_mask.inputs[0])
+    links.new(lt_y.outputs[0], grid_mask.inputs[1])
+
+    mix = nodes.new("ShaderNodeMix")
+    mix.data_type = "RGBA"
+    links.new(grid_mask.outputs[0], mix.inputs["Factor"])
+    mix.inputs[6].default_value = cfg.FLOOR_GRID_BASE_COLOR
+    mix.inputs[7].default_value = cfg.FLOOR_GRID_LINE_COLOR
+
+    links.new(mix.outputs[2], bsdf.inputs["Color"])
+    links.new(bsdf.outputs[0], output.inputs["Surface"])
+
+    floor.data.materials.clear()
+    floor.data.materials.append(mat)
+
+
 def _load_render_job(job_path: str) -> RenderJob:
     with open(job_path, "r") as f:
         data: dict = json.load(f)
@@ -57,6 +137,8 @@ def render_scene(job: RenderJob) -> dict:
         bg_node = world.node_tree.nodes.new("ShaderNodeBackground")
     bg_node.inputs["Color"].default_value = (0.5, 0.5, 0.5, 1)
     bg_node.inputs["Strength"].default_value = 1.0
+
+    _apply_grid_floor_material()
 
     # Compute camera params early (needed by adjust_object_positions)
     camera_fov_rads = math.radians(job.camera_fov_degrees)

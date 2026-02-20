@@ -50,10 +50,11 @@ def _get_model_probs_for_attempt(
 
 def _build_background_prompt(background_str: str, objects_str: str) -> str:
     return (
-        "Making sure it coheres with the proportions and positions of existing objects, "
-        f"fill in the empty space with a {background_str} scene backdrop. Use minimal, "
-        "not-too-busy textures. Prefer a neutral color scheme that differs from the colors"
-        " of the existing objects so that they stand out from the background."
+        "Using the grid lines to guide your scene's perspective and cohering with the "
+        f"existing object sizes, fill in the empty space with a {background_str} scene "
+        "backdrop. Use minimal, not-too-busy textures. Prefer a neutral color scheme that "
+        "differs from the colors of the existing objects so that they stand out from the "
+        "background."
     )
 
 

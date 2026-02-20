@@ -1,5 +1,5 @@
-num_blender_scenes: 3
-num_renders: 5
+num_blender_scenes: 1
+num_renders: 8
 num_edit_chains: 4
 min_render_quality_score: 0.35
 max_edit_attempts: 4
@@ -15,7 +15,7 @@ blender_lm: "gpt-5.2-2025-12-11"
 blender_lm_temperature: 1.4
 critic_vlm: "gpt-5.2-2025-12-11"
 critic_vlm_temperature: 0.5
-contraction_strength: 0.2
+contraction_strength: 0.3
 save_blend_files: false
 # seed: 42
 single_object_check_threshold: 0.4
@@ -24,9 +24,10 @@ edit_model_selection_schedule:
     to_attempt: null
     model_probs:
       # "fal-ai/flux-2/turbo/edit": 1.0
-      "fal-ai/gpt-image-1.5/edit": 0.11
+      # "fal-ai/flux-2/edit": 1.0
+      # "fal-ai/gpt-image-1.5/edit": 0.11
       "fal-ai/gemini-25-flash-image/edit": 0.4
-      "xai/grok-imagine-image/edit": 0.22
+      # "xai/grok-imagine-image/edit": 0.22
   # - from_attempt: 3
   #   to_attempt: null
   #   model_probs:

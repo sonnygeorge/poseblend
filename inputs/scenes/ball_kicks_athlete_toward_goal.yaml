@@ -6,6 +6,8 @@ role_assignments:
   toward: goal
 aliases:
   athlete: "human athlete in a yellow jersey"
+  ball: "soccer ball"
+  goal: "soccer goal"
 scale_amounts:
   ball: 1.9
 localized_edits:
@@ -20,20 +22,20 @@ localized_edits:
   - region_contains:
       - kicker
     requirements:
-      - "{kicker} is actually a cartoon-y carachter with legs and shoes"
+      - "{kicker} is actually a cute cartoon-y character with a face, long legs, and soccer cleats"
   - region_contains:
       - kicker
     requirements:
-      - "One of {kicker}'s two legs is extended out towards {kicked} as if it had just kicked them in the direction of the goal"
+      - "One of {kicker}'s two legs is extended out towards {kicked} as if it had just kicked them in the direction of {toward}"
+      - "{kicker}'s gaze is towards {kicked}"
   - region_contains:
       - kicked
     requirements:
       - "{kicked} is airborne"
-      - "{kicked} is (more of less) horizontal, a in a dynamic \"hurtling-through-the-air\" position"
-      - "{kicked}'s gaze is towards the goal"
+      - "{kicked} is in a superman-like flying pose with their head and arms pointed toward {toward}"
   - region_contains:
       - kicked
     requirements:
-      - "Short wind-mark motion trails extend back from {kicked} down in the direction of {kicker}'s extended foot, indicating the lastmost chunk (inches?) of airspace that {kicked} has flown through"
+      - "Very short dash-like wind-mark motion trails extend back from {kicked} down in the direction of {kicker}'s extended foot, indicating the lastmost chunk (inches?) of airspace that {kicked} has flown through"
 final_requirements:
-  - "{kicked} seems to be flying/hurtling on a path from {kicker} towards {toward}, since there are motion trails extending back from {kicked} down in the direction of {kicker}/{kicker}'s foot'
+  - "{kicked} seems to be flying on a path from {kicker} towards {toward}. There are motion trails extending back from {kicked} towards {kicker}/{kicker}'s foot."

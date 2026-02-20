@@ -24,6 +24,13 @@ DENSITY_THRESHOLD = 0.35
 # (0–1; 0.3 means positions shrink to at most 30% of their original spread)
 S_MIN = 0.3
 
+# --- Floor grid ---
+FLOOR_OBJECT_NAME = "Plane"
+FLOOR_GRID_SPACING = 0.016
+FLOOR_GRID_LINE_WIDTH = 0.0006
+FLOOR_GRID_BASE_COLOR = (1.0, 1.0, 1.0, 1.0)
+FLOOR_GRID_LINE_COLOR = (0.85, 0.85, 0.85, 1.0)
+
 # --- Airspace enforcement ---
 # Fraction of the min camera distance used as the minimum surface-to-surface
 # gap between objects (e.g. 0.1 = 10% of camera distance)
