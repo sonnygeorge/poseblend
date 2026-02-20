@@ -8,7 +8,7 @@ from poseblend.run_context import RunContext
 
 # Padding added around the tight object bounding box before cropping, as a
 # fraction of the box dimensions (e.g. 0.05 = 5% padding on each side)
-CROP_PADDING_FRACTION = 0.025
+CROP_PADDING_FRACTION = 0.045
 
 
 def _load_masks_from_dir(mask_dir: Path) -> list[np.ndarray]:

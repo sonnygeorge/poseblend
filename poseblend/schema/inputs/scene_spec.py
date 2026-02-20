@@ -26,6 +26,9 @@ class PoseBlendSceneSpec(BaseModel):
             BlenderObjectRegistry, e.g. {"thrower": "person", "thrown": "ball", ...}.
         localized_edits: Ordered list of region-level edit specs whose requirement
             templates reference keys from role_assignments.
+        aliases: Optional mapping from object names to display strings used in
+            prompts/requirements, e.g. {"athlete": "human athlete"}. When absent,
+            the raw object name from role_assignments is used.
     """
 
     scene_as_natural_language: str
@@ -33,9 +36,17 @@ class PoseBlendSceneSpec(BaseModel):
     role_assignments: dict[str, str]
     localized_edits: list[LocalizedEditSpec]
     final_requirements: list[str] = Field(default_factory=list)
+    aliases: dict[str, str] = Field(default_factory=dict)
+    scale_amounts: dict[str, float] = Field(default_factory=dict)
+
+    def get_object_alias(self, obj_name: str) -> str:
+        return self.aliases.get(obj_name, obj_name)
 
     def _hydrate_requirement(self, template: str) -> str:
-        strs_by_role = {k: f"the {v}" for k, v in self.role_assignments.items()}
+        strs_by_role = {
+            k: f"the {self.get_object_alias(v)}"
+            for k, v in self.role_assignments.items()
+        }
         hydrated = template.format(**strs_by_role)
         return hydrated[0].upper() + hydrated[1:]
 

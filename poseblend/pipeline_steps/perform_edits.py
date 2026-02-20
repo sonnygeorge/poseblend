@@ -106,7 +106,9 @@ async def _run_single_edit_chain(
     single_object_reqs = build_single_object_requirements(ctx)
     hydrated_edit_reqs = scene_spec.get_hydrated_edit_requirements()
     unique_objects = sorted(set(scene_spec.role_assignments.values()))
-    objects_str = list_grammatically([f"the {obj}" for obj in unique_objects])
+    objects_str = list_grammatically(
+        [f"the {scene_spec.get_object_alias(obj)}" for obj in unique_objects]
+    )
 
     current_img_path = edit_chain.starting_render_path
     previously_passed_edit_reqs: list[str] = []
@@ -144,7 +146,7 @@ async def _run_single_edit_chain(
         edit_model = ctx.get_image_edit_model(model_name)
         generation_seed = _sub_seed(attempt_seed, 3)
         result_url = await edit_model.edit(
-            prompt=prompt, image_urls=[source_uri], seed=generation_seed
+            prompt=prompt, image_urls=[source_uri], seed=generation_seed, enable_safety_checker=False,
         )
 
         after_path = chain_dir / f"edit_0_attempt_{attempt_num}.png"
@@ -242,7 +244,9 @@ async def _run_single_edit_chain(
             continue
 
         region_objects = [scene_spec.role_assignments[role] for role in edit_spec.region_contains]
-        object_names = list_grammatically([f"the {obj}" for obj in region_objects])
+        object_names = list_grammatically(
+            [f"the {scene_spec.get_object_alias(obj)}" for obj in region_objects]
+        )
 
         for attempt_num in range(1, max_attempts + 1):
             attempt_seed = _next_seed()
@@ -259,7 +263,7 @@ async def _run_single_edit_chain(
             edit_model = ctx.get_image_edit_model(model_name)
             generation_seed = _sub_seed(attempt_seed, 2)
             result_url = await edit_model.edit(
-                prompt=prompt, image_urls=[source_uri], seed=generation_seed
+                prompt=prompt, image_urls=[source_uri], seed=generation_seed, enable_safety_checker=False,
             )
 
             after_path = chain_dir / f"edit_{edit_idx}_attempt_{attempt_num}.png"

@@ -1,0 +1,39 @@
+scene_as_natural_language: A ball kicks an athlete toward the goal.
+action: kicks toward
+role_assignments:
+  kicker: ball
+  kicked: athlete
+  toward: goal
+aliases:
+  athlete: "human athlete in a yellow jersey"
+scale_amounts:
+  ball: 1.9
+localized_edits:
+  - region_contains:
+      - kicked
+    requirements:
+      - "{kicked} is directly in between {kicker} and {toward}"
+  - region_contains:
+      - toward
+    requirements:
+      - "The opening of {toward} is facing towards {kicked}"
+  - region_contains:
+      - kicker
+    requirements:
+      - "{kicker} is actually a cartoon-y carachter with legs and shoes"
+  - region_contains:
+      - kicker
+    requirements:
+      - "One of {kicker}'s two legs is extended out towards {kicked} as if it had just kicked them in the direction of the goal"
+  - region_contains:
+      - kicked
+    requirements:
+      - "{kicked} is airborne"
+      - "{kicked} is (more of less) horizontal, a in a dynamic \"hurtling-through-the-air\" position"
+      - "{kicked}'s gaze is towards the goal"
+  - region_contains:
+      - kicked
+    requirements:
+      - "Short wind-mark motion trails extend back from {kicked} down in the direction of {kicker}'s extended foot, indicating the lastmost chunk (inches?) of airspace that {kicked} has flown through"
+final_requirements:
+  - "{kicked} seems to be flying/hurtling on a path from {kicker} towards {toward}, since there are motion trails extending back from {kicked} down in the direction of {kicker}/{kicker}'s foot'

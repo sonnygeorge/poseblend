@@ -30,14 +30,16 @@ def _build_render_job(
     config = ctx.run_data.config
     registry = ctx.run_data.blender_object_registry
 
+    scene_spec = ctx.run_data.scene_spec
     objects = []
     for placement in scene.params.placements:
         meta = registry.objects[placement.name]
         file_path = str(Path(config.objects_dir_path) / meta.file)
+        scale = meta.scale_factor * scene_spec.scale_amounts.get(placement.name, 1.0)
         objects.append(asdict(BlenderObjectSpec(
             name=meta.name,
             file_path=file_path,
-            scale_factor=meta.scale_factor,
+            scale_factor=scale,
             default_facing_orientation=meta.default_facing_orientation,
         )))
 
@@ -96,7 +98,7 @@ async def _render_single_scene(
         async for raw_line in proc.stdout:
             line = raw_line.decode("utf-8", errors="replace").rstrip("\n")
             # Suppress Blender's noise output
-            if not _BLENDER_NOISE_RE.match(line):
+            if line.strip() and not _BLENDER_NOISE_RE.match(line):
                 print(line)  # noqa: T201
         await proc.wait()
 

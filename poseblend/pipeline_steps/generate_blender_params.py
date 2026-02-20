@@ -13,7 +13,8 @@ USER_PROMPT_TEMPLATE = (PROMPTS_DIR / "generate_blender_params_user.txt").read_t
 
 def _build_messages(run_data: RunData) -> list[Message]:
     role_assignments_str = "\n".join(
-        f"  {role} -> {obj}" for role, obj in run_data.scene_spec.role_assignments.items()
+        f"  {role} -> {run_data.scene_spec.get_object_alias(obj)}"
+        for role, obj in run_data.scene_spec.role_assignments.items()
     )
 
     # NOTE: Sorting for deterministic output

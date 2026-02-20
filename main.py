@@ -13,7 +13,8 @@ load_dotenv()
 # CONFIG_PATH_DEFAULT = "inputs/configs/simple.yaml"
 CONFIG_PATH_DEFAULT = "inputs/configs/recommended.yaml"
 SCENE_PATH_DEFAULT = "inputs/scenes/dog_throws_laptop_over_sign_to_person.yaml"
-# SCENE_PATH_DEFAULT = "inputs/scenes/puma_shows_bird_to_person_car_nearby.yaml"
+# SCENE_PATH_DEFAULT = "inputs/scenes/horse_shows_bird_to_person_violin_nearby.yaml"
+SCENE_PATH_DEFAULT = "inputs/scenes/horse_rides_astronaut.yaml"
 BLENDER_OBJECT_DATA_PATH_DEFAULT = "inputs/blender_object_data.yaml"
 DEFAULT_GUI_PORT = 8420
 

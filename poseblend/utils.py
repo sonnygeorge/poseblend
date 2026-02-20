@@ -108,9 +108,11 @@ async def download_image(url: str, save_path: Path) -> Path:
 
 
 def build_single_object_requirements(ctx: "RunContext") -> list[str]:
-    unique_objects = sorted(set(ctx.run_data.scene_spec.role_assignments.values()))
+    spec = ctx.run_data.scene_spec
+    unique_objects = sorted(set(spec.role_assignments.values()))
     return [
-        f"A single {obj} is visible in the image and it isn't mangled/malformed." for obj in unique_objects
+        f"A single {spec.get_object_alias(obj)} is visible in the image and it isn't mangled/malformed."
+        for obj in unique_objects
     ]
 
 

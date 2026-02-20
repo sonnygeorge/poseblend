@@ -1,0 +1,21 @@
+scene_as_natural_language: A chandalier hangs from a person.
+action: hangs from
+role_assignments:
+  hanging: chandalier
+  hung_from: person
+localized_edits:
+  - region_contains:
+      - hanging
+    requirements:
+      - "{hanging} is off to the side of {hung_from}"
+      - "In terms of how high it is off the ground, {hanging} is below {hung_from}'s head-level"
+  - region_contains:
+      - hung_from
+    requirements:
+      - "{hung_from}'s arm is outstretched"
+  - region_contains:
+      - hanging
+      - hung_from
+    requirements:
+      - "{hanging} is suspended from {hung_from}'s wrist"
+      - "{hanging} is attached to {hung_from}'s wrist and nothing else"
