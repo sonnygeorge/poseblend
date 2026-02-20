@@ -47,15 +47,19 @@
 
           <ImageCard
             cardKey={`chain-${chainIdx}-starting-render`}
-            imageSrc={imageUrl(chain.starting_render_path, runId)}
+            imageSrc={imageUrl(chain.starting_img_path, runId)}
             gateDecision={{ is_passing: true, reason: "Selected render" }}
-            metadata={{ gateDecision: { is_passing: true, reason: "Selected render" } }}
+            metadata={{
+              gateDecision: { is_passing: true, reason: "Selected render" },
+              modelUsed: chain.starting_img_model,
+              promptUsed: chain.starting_img_prompt,
+            }}
             size="small"
           />
 
           {#each chain.edits as attempts, editIdx (editIdx)}
             <div class="edit-row">
-              <span class="edit-label">{editIdx === 0 ? "Background" : `Edit ${editIdx}`}</span>
+              <span class="edit-label">{editIdx === 0 && !chain.starting_img_prompt ? "Background" : `Edit ${editIdx + (chain.starting_img_prompt ? 1 : 0)}`}</span>
               <ImageGroup
                 items={buildAttemptItems(attempts, chainIdx, editIdx)}
                 gateDecision={editGroupGateDecision(attempts)}

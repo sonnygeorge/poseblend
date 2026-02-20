@@ -46,6 +46,8 @@
             sceneQualityScore: scene.scene_quality_score,
             gateDecision: scene.gate_decision,
             isSelected: scene.is_selected,
+            modelUsed: $runData?.config?.blender_lm,
+            promptUsed: scene.prompt_used,
           }}
         />
       {/each}

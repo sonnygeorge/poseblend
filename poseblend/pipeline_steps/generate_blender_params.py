@@ -5,6 +5,7 @@ from poseblend.models.vlm.base import Message, MessageContent
 from poseblend.run_context import RunContext
 from poseblend.schema.lm_outputs import BlenderSceneParams
 from poseblend.schema.run_data import RunData
+from poseblend.utils import messages_to_prompt_string
 
 PROMPTS_DIR = Path(__file__).parent.parent / "prompts"
 SYSTEM_PROMPT = (PROMPTS_DIR / "generate_blender_params_system.txt").read_text()
@@ -58,7 +59,7 @@ def _build_messages(run_data: RunData) -> list[Message]:
 async def generate_blender_params(
     ctx: RunContext,
     seeds: list[int | None],
-) -> list[BlenderSceneParams]:
+) -> tuple[list[BlenderSceneParams], str]:
     lm = ctx.get_vlm(ctx.run_data.config.blender_lm)
     messages = _build_messages(ctx.run_data)
     temperature = ctx.run_data.config.blender_lm_temperature
@@ -71,4 +72,5 @@ async def generate_blender_params(
         )
         for seed in seeds
     ]
-    return await asyncio.gather(*tasks)
+    params_list = await asyncio.gather(*tasks)
+    return params_list, messages_to_prompt_string(messages)

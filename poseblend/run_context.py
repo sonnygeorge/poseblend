@@ -2,8 +2,13 @@ import asyncio
 from collections.abc import Callable
 
 from poseblend.models.image_edit.base import BaseImageEditModel
-from poseblend.models.registry import get_image_edit_model, get_vlm
-from poseblend.models.semaphore_wrappers import SemaphoreImageEditModel, SemaphoreVLM
+from poseblend.models.registry import get_image_edit_model, get_t2i_model, get_vlm
+from poseblend.models.semaphore_wrappers import (
+    SemaphoreImageEditModel,
+    SemaphoreT2IModel,
+    SemaphoreVLM,
+)
+from poseblend.models.t2i.base import BaseT2IModel
 from poseblend.models.vlm.base import BaseVLM
 from poseblend.schema.run_data import RunData
 
@@ -34,4 +39,9 @@ class RunContext:
     def get_image_edit_model(self, model: str) -> BaseImageEditModel:
         return SemaphoreImageEditModel(
             get_image_edit_model(model), self._inference_semaphore
+        )
+
+    def get_t2i_model(self, model: str) -> BaseT2IModel:
+        return SemaphoreT2IModel(
+            get_t2i_model(model), self._inference_semaphore
         )

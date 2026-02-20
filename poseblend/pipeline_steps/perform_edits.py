@@ -111,7 +111,7 @@ async def _run_single_edit_chain(
         [f"the {scene_spec.get_object_alias(obj)}" for obj in unique_objects]
     )
 
-    current_img_path = edit_chain.starting_render_path
+    current_img_path = edit_chain.starting_img_path
     previously_passed_edit_reqs: list[str] = []
     tick = 0
 
@@ -127,86 +127,91 @@ async def _run_single_edit_chain(
             return None
         return derive_seed(attempt_seed, n)
 
+    skip_background_edit = config.t2i_model is not None
+
     # --- Edit 0: Background edit ---
-    bg_attempts: list[AttemptedEdit] = []
-    edit_chain.edits.append(bg_attempts)
-
-    for attempt_num in range(1, max_attempts + 1):
-        attempt_seed = _next_seed()
-        bg_str = random.Random(_sub_seed(attempt_seed, 1)).choice(config.background_strs)
-
-        model_probs = _get_model_probs_for_attempt(
-            config.edit_model_selection_schedule, attempt_num
-        )
-        model_name = sample_from_discrete_distribution(
-            model_probs, seed=_sub_seed(attempt_seed, 2)
-        )
-
-        prompt = _build_background_prompt(bg_str, objects_str)
-        source_uri = image_path_to_data_uri(current_img_path)
-        edit_model = ctx.get_image_edit_model(model_name)
-        generation_seed = _sub_seed(attempt_seed, 3)
-        result_url = await edit_model.edit(
-            prompt=prompt, image_urls=[source_uri], seed=generation_seed, enable_safety_checker=False,
-        )
-
-        after_path = chain_dir / f"edit_0_attempt_{attempt_num}.png"
-        await download_image(result_url, after_path)
-
-        decision, invocations = await _check_requirements(
-            ctx,
-            after_path,
-            [
-                (BG_ONLY_REQS, EDIT_REQUIREMENT_PASS_THRESHOLD),
-                (single_object_reqs, single_object_threshold),
-            ],
-            base_seed=_sub_seed(attempt_seed, 4),
-        )
-        bg_attempts.append(AttemptedEdit(
-            seed=attempt_seed,
-            before_img_path=current_img_path,
-            after_img_path=after_path,
-            prompt_used=prompt,
-            model_used=model_name,
-            critic_invocations=invocations,
-            
-            gate_decision=decision,
-        ))
-        ctx.on_run_data_changed()
-
-        if decision.is_passing:
-            current_img_path = after_path
-            logger.debug(
-                f"Edit chain {chain_idx}: background edit passed on attempt {attempt_num}"
-            )
-            break
-
-        logger.debug(
-            f"Edit chain {chain_idx}: background edit failed attempt {attempt_num}"
-            f"/{max_attempts} — {decision.reason}"
-        )
+    if skip_background_edit:
+        persisting_invocations_if_next_edit_skipped = []
     else:
-        edit_chain.gate_decision = GateDecision(
-            is_passing=False,
-            reason=(
-                f"Background edit failed after {max_attempts} attempts. "
-                f"Last failure: {bg_attempts[-1].gate_decision.reason}"
-            ),
-        )
-        ctx.on_run_data_changed()
-        return
+        bg_attempts: list[AttemptedEdit] = []
+        edit_chain.edits.append(bg_attempts)
 
-    # Strip out BG_ONLY_REQS invocations before carrying forward. BG_ONLY_REQS are
-    # requirements specific to the background edit and are not requirements for localized
-    # edits. If a localized edit gets skipped (because its requirements are already met),
-    # these carried-forward invocations get attached to the skipped edit's record. Including
-    # BG_ONLY_REQS there would incorrectly present them as requirements that the localized
-    # edit "passed," when they were never requirements for such edits in the first place.
-    bg_only_req_set = set(BG_ONLY_REQS)
-    persisting_invocations_if_next_edit_skipped = [
-        inv for inv in bg_attempts[-1].critic_invocations
-        if inv.requirement not in bg_only_req_set
-    ]
+        for attempt_num in range(1, max_attempts + 1):
+            attempt_seed = _next_seed()
+            bg_str = random.Random(_sub_seed(attempt_seed, 1)).choice(config.background_strs)
+
+            model_probs = _get_model_probs_for_attempt(
+                config.edit_model_selection_schedule, attempt_num
+            )
+            model_name = sample_from_discrete_distribution(
+                model_probs, seed=_sub_seed(attempt_seed, 2)
+            )
+
+            prompt = _build_background_prompt(bg_str, objects_str)
+            source_uri = image_path_to_data_uri(current_img_path)
+            edit_model = ctx.get_image_edit_model(model_name)
+            generation_seed = _sub_seed(attempt_seed, 3)
+            result_url = await edit_model.edit(
+                prompt=prompt, image_urls=[source_uri], seed=generation_seed, enable_safety_checker=False,
+            )
+
+            after_path = chain_dir / f"edit_0_attempt_{attempt_num}.png"
+            await download_image(result_url, after_path)
+
+            decision, invocations = await _check_requirements(
+                ctx,
+                after_path,
+                [
+                    (BG_ONLY_REQS, EDIT_REQUIREMENT_PASS_THRESHOLD),
+                    (single_object_reqs, single_object_threshold),
+                ],
+                base_seed=_sub_seed(attempt_seed, 4),
+            )
+            bg_attempts.append(AttemptedEdit(
+                seed=attempt_seed,
+                before_img_path=current_img_path,
+                after_img_path=after_path,
+                prompt_used=prompt,
+                model_used=model_name,
+                critic_invocations=invocations,
+
+                gate_decision=decision,
+            ))
+            ctx.on_run_data_changed()
+
+            if decision.is_passing:
+                current_img_path = after_path
+                logger.debug(
+                    f"Edit chain {chain_idx}: background edit passed on attempt {attempt_num}"
+                )
+                break
+
+            logger.debug(
+                f"Edit chain {chain_idx}: background edit failed attempt {attempt_num}"
+                f"/{max_attempts} — {decision.reason}"
+            )
+        else:
+            edit_chain.gate_decision = GateDecision(
+                is_passing=False,
+                reason=(
+                    f"Background edit failed after {max_attempts} attempts. "
+                    f"Last failure: {bg_attempts[-1].gate_decision.reason}"
+                ),
+            )
+            ctx.on_run_data_changed()
+            return
+
+        # Strip out BG_ONLY_REQS invocations before carrying forward. BG_ONLY_REQS are
+        # requirements specific to the background edit and are not requirements for localized
+        # edits. If a localized edit gets skipped (because its requirements are already met),
+        # these carried-forward invocations get attached to the skipped edit's record. Including
+        # BG_ONLY_REQS there would incorrectly present them as requirements that the localized
+        # edit "passed," when they were never requirements for such edits in the first place.
+        bg_only_req_set = set(BG_ONLY_REQS)
+        persisting_invocations_if_next_edit_skipped = [
+            inv for inv in bg_attempts[-1].critic_invocations
+            if inv.requirement not in bg_only_req_set
+        ]
 
     # --- Edits 1..N: Localized edits ---
     for edit_idx, (edit_spec, edit_reqs) in enumerate(
@@ -345,12 +350,21 @@ async def _run_single_edit_chain(
 async def perform_all_edits(
     ctx: RunContext,
     selected_renders: list[SceneRender],
+    starting_img_prompts: list[str | None] | None = None,
+    starting_img_model: str | None = None,
 ) -> None:
     chain_seeds = derive_seeds(ctx.run_data.config.seed, len(selected_renders))
+    prompts = starting_img_prompts or [None] * len(selected_renders)
     # Eagerly create edit chains on run_data so GUI can see them immediately
     ctx.run_data.edit_chains = [
-        EditChain(starting_render_path=render.image_path, edits=[], candidate_final_img_path=None)
-        for render in selected_renders
+        EditChain(
+            starting_img_path=render.image_path,
+            starting_img_prompt=prompt,
+            starting_img_model=starting_img_model,
+            edits=[],
+            candidate_final_img_path=None,
+        )
+        for render, prompt in zip(selected_renders, prompts)
     ]
     ctx.on_run_data_changed()
 

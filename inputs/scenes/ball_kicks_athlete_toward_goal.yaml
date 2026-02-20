@@ -27,15 +27,18 @@ localized_edits:
       - kicker
     requirements:
       - "One of {kicker}'s two legs is extended out towards {kicked} as if it had just kicked them in the direction of {toward}"
-      - "{kicker}'s gaze is towards {kicked}"
+      - "{kicker} is looking at {kicked}"
   - region_contains:
       - kicked
     requirements:
       - "{kicked} is airborne"
       - "{kicked} is in a superman-like flying pose with their head and arms pointed toward {toward}"
   - region_contains:
+      - kicker
       - kicked
     requirements:
-      - "Very short dash-like wind-mark motion trails extend back from {kicked} down in the direction of {kicker}'s extended foot, indicating the lastmost chunk (inches?) of airspace that {kicked} has flown through"
+      - "A dotted line extends from {kicker}'s foot to {kicked}, indicating that {kicked}'s flight is coming off from {kicker}'s foot"
 final_requirements:
-  - "{kicked} seems to be flying on a path from {kicker} towards {toward}. There are motion trails extending back from {kicked} towards {kicker}/{kicker}'s foot."
+  # - "{kicked} seems to be flying on a path from {kicker} towards {toward}. There are motion trails extending back from {kicked} towards {kicker}/{kicker}'s foot."
+  - "It appears as that though {kicked}'s flight path originated from {kicker}'s foot"
+  - "{kicked} is head towards {toward}"

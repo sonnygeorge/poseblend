@@ -2,8 +2,6 @@
 
 PoseBlend: Compositional Action Scenes via Critic-Gated Localized Pose Editing of Blender Renders
 
-> Text-to-image models perform well on common scenes but struggle with long-tail and out-of-distribution compositions. In particular, they fail to generate complex action scenes in which multiple entities must assume coherent roles, spatial relationships, and physically plausible poses—especially in rare configurations underrepresented in training data. We propose PoseBlend, an open-source image generation pipeline that (1) arranges and renders scenes of arbitrary Blender objects and (2) applies critic-gated localized diffusion edits to introduce realistic backgrounds and iteratively refine object poses. We demonstrate the system on atypical action-role configurations and show that PoseBlend consistently outperforms <SOTA MODEL>, achieving an <NUMBER>\% improvement in mean VQA score. Beyond improving generation quality, PoseBlend enables controlled synthesis of rare and parameterized action-role configurations, supporting synthetic data augmentation and systematic study of compositional generalization in vision-language models. The system is modular, model-agnostic, and released for reproducible research.
-
 ## How does it work?
 
 ![PoseBlend Pipeline](static/poseblend_flowchart.png)
@@ -57,6 +55,32 @@ To run, PoseBlend requires three things:
 1. An input scene specification
 2. A configuration of hyperparameters
 3. A registry/repository of usable Blender objects
+
+## Alternative to Blender Renders: Generating Starting Images with T2I Models
+
+PoseBlend can optionally skip Blender rendering entirely and instead bootstrap edit
+chains from text-to-image (T2I) generated starting images. This is useful as a baseline
+for measuring the value of the Blender rendering stage, or as a lightweight alternative
+when Blender objects are unavailable.
+
+To enable T2I mode, set `t2i_model` in the config YAML to a registered T2I model name:
+
+```yaml
+t2i_model: "fal-ai/flux-2"
+```
+
+When `t2i_model` is set, PoseBlend will:
+
+1. Use an LLM to generate a T2I prompt describing the scene's objects in a plausible
+   spatial arrangement (neutral poses, no action depicted)
+2. Generate `num_edit_chains` starting images with the T2I model
+3. Skip the background edit (Edit 0) and go straight to localized pose edits
+
+A ready-to-use config is provided at `inputs/configs/t2i_baseline.yaml`:
+
+```bash
+python main.py --config inputs/configs/t2i_baseline.yaml --scene inputs/scenes/horse_rides_astronaut.yaml
+```
 
 ## 3D Object Attributions
 

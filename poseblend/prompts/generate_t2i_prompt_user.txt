@@ -1,0 +1,12 @@
+Scene: {scene_description}
+Action: {action}
+
+Role assignments:
+{role_assignments}
+
+Objects that must appear:
+{object_names}
+
+Background/setting: {background_str}
+
+Write a text-to-image prompt that places these objects in a spatial arrangement that sets the stage for the described action, but with all objects in neutral/default poses. Do NOT describe the action or any action-specific posing.

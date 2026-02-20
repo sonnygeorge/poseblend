@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import AliasChoices, BaseModel, Field, model_validator
 
 from poseblend.schema.inputs.blender_objects import BlenderObjectRegistry
 from poseblend.schema.inputs.config import PoseBlendConfig
@@ -31,7 +31,12 @@ class AttemptedEdit(BaseModel):
 
 
 class EditChain(BaseModel):
-    starting_render_path: Path
+    # TODO: Remove AliasChoices once legacy run_data.json files are no longer viewed
+    starting_img_path: Path = Field(
+        validation_alias=AliasChoices("starting_img_path", "starting_render_path"),
+    )
+    starting_img_prompt: str | None = None
+    starting_img_model: str | None = None
     edits: list[list[AttemptedEdit]]
     candidate_final_img_path: Path | None
     final_critic_invocations: list[CriticInvocation] = Field(default_factory=list)
@@ -56,6 +61,7 @@ class BlenderScene(BaseModel):
     scene_quality_score: float | None = None
     is_selected: bool = False
     gate_decision: GateDecision | None = None
+    prompt_used: str | None = None
 
 
 class RunData(BaseModel):

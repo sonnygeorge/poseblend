@@ -1,0 +1,47 @@
+num_blender_scenes: 1
+num_renders: 1
+num_edit_chains: 4
+min_render_quality_score: 0.35
+max_edit_attempts: 4
+max_concurrent_inference_requests: 10
+max_concurrent_blender_processes: 1
+base_scene_path: "inputs/objaverse/base_scene.blend"
+objects_dir_path: "inputs/objaverse/shapes"
+output_dir_path: "outputs"
+render_resolution_x: 512
+render_resolution_y: 512
+camera_fov_degrees: 60
+blender_lm: "gpt-5.2-2025-12-11"
+blender_lm_temperature: 1.4
+critic_vlm: "gpt-5.2-2025-12-11"
+critic_vlm_temperature: 0.5
+# seed: 42
+single_object_check_threshold: 0.4
+edit_model_selection_schedule:
+  - from_attempt: 1
+    to_attempt: null
+    model_probs:
+      "fal-ai/gemini-25-flash-image/edit": 0.4
+background_strs:
+  - "sandy"
+  - "visually minimal empty green landscape"
+  - "grassy"
+  - "empty open industrial space"
+  - "snowy"
+  - "plain grassy field"
+  - "empty cracked dry lake bed"
+  - "empty tundra"
+  - "open empty landscape"
+  - "empty hangar"
+  - "empty city park"
+  - "empty indoor tiled space"
+  - "empty parking lot"
+  - "empty gravelled area"
+  - "empty industrial space with concrete floor"
+  - "plain grassy"
+  - "visually minimal empty warehouse"
+  - "empty indoor brick floor space"
+  - "visually minimal flat arid desert"
+  - "empty commercial office space"
+  - "empty minimal skate park"
+t2i_model: "fal-ai/gemini-25-flash-image"

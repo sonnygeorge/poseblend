@@ -10,16 +10,16 @@ localized_edits:
       - shower
       - shown
     requirements:
-      - "{shower}'s is more or less oriented towards {shown_to}."
-      - "{shower}'s gaze is looking at {shown}."
-      - "{shower}'s arm is outstretched."
-      - "{shown} is perched on {shower}'s arm."
+      - "{shower}'s is more or less oriented towards {shown_to}"
+      - "{shower}'s gaze is looking at {shown}"
+      - "{shower}'s arm is outstretched"
+      - "{shown} is perched on {shower}'s arm"
   - region_contains:
       - shown_to
     requirements:
-      - "{shown_to} is close to {shower} with their body oriented towards them."
-      - "{shown_to}'s gaze is looking at {shown}."
+      - "{shown_to} is close to {shower} with their body oriented towards them"
+      - "{shown_to}'s gaze is looking at {shown}"
   - region_contains:
       - nearby
     requirements:
-      - "{nearby} is in the scene periphery, paying no attention to {shower}, {shown}, or {shown_to}."
+      - "{nearby} is in the scene periphery, paying no attention to {shower}, {shown}, or {shown_to}"

@@ -31,3 +31,4 @@ class PoseBlendConfig(BaseModel):
     contraction_strength: float = 1.0 # Multiplier for how much scenes get contracted toward centroid
     edit_model_selection_schedule: list[AttemptRangeModelSelectionProbs]
     background_strs: list[str]
+    t2i_model: str | None = None

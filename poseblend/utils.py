@@ -90,6 +90,15 @@ def list_grammatically(items: list[str], enumerate: bool = False) -> str:
     return ", ".join(items[:-1]) + f", and {items[-1]}"
 
 
+def messages_to_prompt_string(messages: list[Message]) -> str:
+    parts = []
+    for msg in messages:
+        for content in msg["content"]:
+            if content["type"] == "text":
+                parts.append(content["content"])
+    return "\n\n".join(parts)
+
+
 def image_path_to_data_uri(path: str | os.PathLike) -> str:
     mime, _ = mimetypes.guess_type(str(path))
     mime = mime or "image/png"
@@ -111,7 +120,7 @@ def build_single_object_requirements(ctx: "RunContext") -> list[str]:
     spec = ctx.run_data.scene_spec
     unique_objects = sorted(set(spec.role_assignments.values()))
     return [
-        f"A single {spec.get_object_alias(obj)} is visible in the image and it isn't mangled/malformed."
+        f"A single {spec.get_object_alias(obj)} is visible in the image, and it isn't mangled/malformed (e.g., has an appropriate number of limbs)."
         for obj in unique_objects
     ]
 

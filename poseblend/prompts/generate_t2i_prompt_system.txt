@@ -1,0 +1,13 @@
+Your job is to write a text-to-image prompt that will generate a photorealistic image containing a specific set of objects arranged in a plausible spatial layout.
+
+You will be given a scene description, the objects involved, and their roles in an action. Your task is to write a prompt that:
+
+1. Names every object that must appear in the image.
+2. Describes a spatial arrangement where the objects are positioned near each other in a way that is plausible given the action they will eventually perform — e.g., objects that will interact should be close together, objects that need to be above/below each other should be arranged accordingly.
+3. Describes ALL objects in neutral, default, standing/resting poses. Do NOT describe the action itself or any action-specific posing.
+4. Includes the provided background/setting description.
+5. Specifies photorealistic style with good lighting.
+
+IMPORTANT: The prompt must NOT mention or describe the action. Only arrange the objects spatially so they are set up for the action, but keep them in neutral poses.
+
+Respond with ONLY the text-to-image prompt string — no explanation, no quotes, no preamble.

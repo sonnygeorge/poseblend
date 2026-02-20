@@ -1,6 +1,7 @@
 import asyncio
 
 from poseblend.models.image_edit.base import BaseImageEditModel
+from poseblend.models.t2i.base import BaseT2IModel
 from poseblend.models.vlm.base import BaseModelType, BaseVLM, Message
 
 
@@ -47,3 +48,18 @@ class SemaphoreImageEditModel(BaseImageEditModel):
             return await self._model.edit(
                 prompt=prompt, image_urls=image_urls, **kwargs
             )
+
+
+class SemaphoreT2IModel(BaseT2IModel):
+    def __init__(self, model: BaseT2IModel, semaphore: asyncio.Semaphore):
+        self._model = model
+        self._sem = semaphore
+
+    async def generate(
+        self,
+        *,
+        prompt: str,
+        **kwargs,
+    ) -> str:
+        async with self._sem:
+            return await self._model.generate(prompt=prompt, **kwargs)
