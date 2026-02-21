@@ -1,0 +1,28 @@
+scene_as_natural_language: A player lobs a basketball hoop towards the basketball.
+action: lobs
+role_assignments:
+  lobber: athlete
+  lobbed: basketball_hoop
+  at: basketball
+aliases:
+  basketball_hoop: "basketball hoop"
+scale_amounts:
+  athlete: 1.1
+  basketball_hoop: 0.7
+  basketball: 1.25
+localized_edits:
+  - region_contains:
+      - lobbed
+    requirements:
+      - "{lobbed} is airborne in the airspace in between {lobber} and {at}"
+  - region_contains:
+      - lobber
+    requirements:
+      - "{lobber} is facing towards {lobbed} with a hind leg slightly raised andtheir arm extended towards it as if they just threw it"
+  - region_contains:
+      - lobbed
+    requirements:
+      - "{lobbed} is slightly off-tilt since it is flying through the air"
+      - "short motion trail dash marks extend back from {lobbed} toward {lobber}'s outstretched arm, indicating the lastmost inches of airspace that {lobbed} has flown through since being chucked"
+final_requirements:
+  - "it is pretty clear that {lobber} threw something that is flying towards {at} and there are not motion trails that seem to contradict this"

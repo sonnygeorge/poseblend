@@ -1,0 +1,40 @@
+# best contraction strength: 0.47-ish
+scene_as_natural_language: A clay pot throws a pottery wheel at a woman.
+action: throws
+role_assignments:
+  thrower: clay_pot
+  thrown: pottery_wheel
+  at: woman
+aliases:
+  clay_pot: "(maybe anthropomorphic) clay pot"
+  pottery_wheel: "white-ish pottery wheel"
+scale_amounts:
+  clay_pot: 1.12
+  pottery_wheel: 1.3
+  woman: 1.1
+localized_edits:
+  - region_contains:
+      - thrown
+    requirements:
+      - "{thrown} is up in the air, between {thrower} and {at}, preferably slightly closer to {at}"
+      - "presumably hurtling through the air, {thrown} is slightly tilted off-axis"
+  - region_contains:
+      - thrown
+      - thrower
+    requirements:
+      - "in the frame, there is some space between {thrower} and {thrown} (they aren't bunched together)"
+  - region_contains:
+      - thrower
+    requirements:
+      - "{thrower} is a character with lengthy capable limbs"
+      - "{thrower} character's body is rotated to be facing {thrown}"
+  - region_contains:
+      - thrower
+    requirements:
+      - "{thrower} character is in what appears to be a throwing follow-through pose with one foot slightly raised and one of its arms extended towards {thrown}"
+  - region_contains:
+      - at
+    requirements:
+      - "{at} is facing AWAY FROM the scene, fleeing in terror"
+final_requirements:
+  - "{thrown} appears to airborne between {thrower} and {at}"

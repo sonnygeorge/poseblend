@@ -1,0 +1,23 @@
+scene_as_natural_language: A matador charges a horse
+action: charges
+role_assignments:
+  charger: matador
+  charged: anthropomorphic_bull
+aliases:
+  anthropomorphic_bull: bull
+localized_edits:
+  - region_contains:
+      - charger
+    requirements:
+      - "{charger} is realistically colored with black hair, a realistic skin tone, and a red matador clothing ensemble"
+  - region_contains:
+      - charger
+    requirements:
+      - "{charger} is mid stride, sprinting with his head down at top speed"
+      - "directionally, {charger} is sprinting towards {charged}"
+      - "a few short streaks of wind (dash marks) trail behind {charger} to emphasize their movement and velocity"
+  - region_contains:
+      - charged
+    requirements:
+      - "{charged} is facing and is looking at {charger}"
+      - "{charged} is standing, holding a red cape out to the side"

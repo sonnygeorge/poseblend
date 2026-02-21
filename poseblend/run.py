@@ -1,5 +1,6 @@
 import time
 from collections.abc import Callable
+from datetime import UTC, datetime
 
 from loguru import logger
 
@@ -12,9 +13,12 @@ from poseblend.pipeline_steps.postprocess_renders import postprocess_all_renders
 from poseblend.pipeline_steps.score_renders import score_all_renders
 from poseblend.pipeline_steps.select_renders import select_renders
 from poseblend.run_context import RunContext
+from poseblend.schema.inputs.blender_objects import BlenderObjectRegistry
+from poseblend.schema.inputs.config import PoseBlendConfig
+from poseblend.schema.inputs.scene_spec import PoseBlendSceneSpec
 from poseblend.schema.lm_outputs import BlenderSceneParams
 from poseblend.schema.run_data import BlenderScene, GateDecision, RunData, SceneRender
-from poseblend.utils import derive_seeds
+from poseblend.utils import derive_seeds, load_yaml
 
 
 async def _run_t2i_baseline(ctx: RunContext, run_start: float) -> RunData:
@@ -128,15 +132,27 @@ async def _run_blender_pipeline(ctx: RunContext, run_start: float) -> RunData:
 
 
 async def run_poseblend(
-    config_path: str,
-    scene_path: str,
-    blender_object_data_path: str,
+    config: str | PoseBlendConfig,
+    scene: str | PoseBlendSceneSpec,
+    blender_object_data: str | BlenderObjectRegistry,
     on_update: Callable[[], None] | None = None,
     run_data: RunData | None = None,
 ) -> RunData:
     run_start = time.time()
     if run_data is None:
-        run_data = RunData.from_input_yaml_paths(config_path, scene_path, blender_object_data_path)
+        if isinstance(config, str):
+            config = PoseBlendConfig.model_validate(load_yaml(config))
+        if isinstance(scene, str):
+            scene = PoseBlendSceneSpec.model_validate(load_yaml(scene))
+        if isinstance(blender_object_data, str):
+            blender_object_data = BlenderObjectRegistry.model_validate(load_yaml(blender_object_data))
+        run_id = datetime.now(tz=UTC).strftime("%Y%m%d_%H%M%S")
+        run_data = RunData(
+            config=config,
+            scene_spec=scene,
+            blender_object_registry=blender_object_data,
+            run_id=run_id,
+        )
     ctx = RunContext(run_data, on_update=on_update)
 
     if run_data.config.t2i_model:

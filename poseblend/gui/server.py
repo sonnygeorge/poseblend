@@ -66,7 +66,7 @@ def create_app(run_data: RunData, run_dir: Path) -> tuple[FastAPI, Callable[[], 
         full_path = run_dir / file_path
         if not full_path.exists() or not full_path.is_file():
             return Response(status_code=404, content="File not found")
-        return FileResponse(full_path)
+        return FileResponse(full_path, headers={"Cache-Control": "no-cache"})
 
     if GUI_DIST_DIR.exists():
         @app.get("/")

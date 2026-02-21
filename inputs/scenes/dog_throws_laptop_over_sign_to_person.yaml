@@ -18,7 +18,7 @@ localized_edits:
   - region_contains:
       - thrower
     requirements:
-      - "the {thrower}'s pose corroborates that they just threw {thrown}—that is, the {thrower}'s pose is more or less a throwing follow-through with at least one arm extended out towards {thrown}"
+      - "{thrower}'s pose corroborates that they just threw {thrown}—that is, the {thrower}'s pose is more or less a throwing follow-through with at least one arm extended out towards {thrown}"
   - region_contains:
       - thrown_to
     requirements:

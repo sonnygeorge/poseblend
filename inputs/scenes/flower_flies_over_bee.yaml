@@ -1,0 +1,26 @@
+scene_as_natural_language: A flower flies over a bee.
+action: flies over
+role_assignments:
+  flyer: flower_in_pot
+  flown_over: bee
+aliases:
+  flower_in_pot: "flower"
+scale_amounts:
+  flower_in_pot: 1.3
+  bee: 2.4
+localized_edits:
+  - region_contains:
+      - flyer
+    requirements:
+      - "{flyer} is in the air directly above {flown_over}"
+  - region_contains:
+      - flown_over
+    requirements:
+      - "{flown_over} is on the ground below {flyer}, which is in the airspace above them"
+  - region_contains:
+      - flyer
+    requirements:
+      - "small motion trail dashes indicate that {flyer} is in motion, flying/whizzing through the air"
+      - "{flyer} is slightly off-tilt since it is hurtling through the air"
+final_requirements:
+  - "{flyer} is hurtling through the air and is currently above {flown_over}"

@@ -59,6 +59,11 @@ objects:
     file: dog.blend
     scale_factor: 1.0
     default_facing_orientation: [0.0, 0.0, 0.0]
+  clay_pot:
+    name: clay_pot
+    file: clay_pot.blend
+    scale_factor: 1.0
+    default_facing_orientation: null
   hut:
     name: hut
     file: hut.blend
@@ -79,9 +84,29 @@ objects:
     file: person.blend
     scale_factor: 0.65
     default_facing_orientation: [0.0, 0.0, 4.7124]
-  hoop:
-    name: hoop
-    file: hoop.blend
+  matador:
+    name: matador
+    file: matador.blend
+    scale_factor: 0.65
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  flower_in_pot:
+    name: flower_in_pot
+    file: flower_in_pot.blend
+    scale_factor: 0.9
+    default_facing_orientation: null
+  woman:
+    name: woman
+    file: woman.blend
+    scale_factor: 0.65
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  pottery_wheel:
+    name: pottery_wheel
+    file: pottery_wheel.blend
+    scale_factor: 0.3
+    default_facing_orientation: null
+  basketball_hoop:
+    name: basketball_hoop
+    file: basketball_hoop.blend
     scale_factor: 0.65
     default_facing_orientation: [0.0, 0.0, 4.7124]
   goal:
@@ -99,6 +124,11 @@ objects:
     file: horse.blend
     scale_factor: 0.81
     default_facing_orientation: [0.0, 0.0, 4.7124]
+  anthropomorphic_bull:
+    name: anthropomorphic_bull
+    file: anthropomorphic_bull.blend
+    scale_factor: 0.81
+    default_facing_orientation: [0.0, 0.0, 4.7124]
   cat:
     name: cat
     file: cat.blend
@@ -107,6 +137,11 @@ objects:
   mouse:
     name: mouse
     file: mouse.blend
+    scale_factor: 0.053
+    default_facing_orientation: [0.0, 0.0, 4.7124]
+  bee:
+    name: bee
+    file: bee.blend
     scale_factor: 0.053
     default_facing_orientation: [0.0, 0.0, 4.7124]
   astronaut:
