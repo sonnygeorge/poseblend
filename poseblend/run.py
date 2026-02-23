@@ -21,7 +21,7 @@ from poseblend.schema.run_data import BlenderScene, GateDecision, RunData, Scene
 from poseblend.utils import derive_seeds, load_yaml
 
 
-async def _run_t2i_baseline(ctx: RunContext, run_start: float) -> RunData:
+async def _run_t2i_mode(ctx: RunContext, run_start: float) -> RunData:
     run_data = ctx.run_data
     config = run_data.config
 
@@ -69,7 +69,7 @@ async def _run_t2i_baseline(ctx: RunContext, run_start: float) -> RunData:
     return run_data
 
 
-async def _run_blender_pipeline(ctx: RunContext, run_start: float) -> RunData:
+async def _run_with_blender(ctx: RunContext, run_start: float) -> RunData:
     run_data = ctx.run_data
     config = run_data.config
     n_scenes = config.num_blender_scenes
@@ -156,6 +156,6 @@ async def run_poseblend(
     ctx = RunContext(run_data, on_update=on_update)
 
     if run_data.config.t2i_model:
-        return await _run_t2i_baseline(ctx, run_start)
+        return await _run_t2i_mode(ctx, run_start)
     else:
-        return await _run_blender_pipeline(ctx, run_start)
+        return await _run_with_blender(ctx, run_start)

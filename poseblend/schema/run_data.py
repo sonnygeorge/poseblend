@@ -76,6 +76,15 @@ class RunData(BaseModel):
     def run_dir(self) -> Path:
         return Path(self.config.output_dir_path) / self.run_id
 
+    @property
+    def num_successful_generations(self) -> int:
+        return sum(
+            edit_chain.gate_decision.is_passing
+            for edit_chain in self.edit_chains
+            if edit_chain.gate_decision is not None
+        )
+
+
     def save(self) -> Path:
         self.run_dir.mkdir(parents=True, exist_ok=True)
         path = self.run_dir / "run_data.json"

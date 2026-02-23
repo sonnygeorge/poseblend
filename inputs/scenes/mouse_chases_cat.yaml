@@ -3,6 +3,9 @@ action: chases
 role_assignments:
   chaser: mouse
   chased: cat
+scale_amounts:
+  mouse: 1.39
+  cat: 1.34
 localized_edits:
   - region_contains:
       - chaser
