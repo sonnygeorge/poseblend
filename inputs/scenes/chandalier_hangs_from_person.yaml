@@ -3,6 +3,9 @@ action: hangs from
 role_assignments:
   hanging: chandalier
   hung_from: person
+scale_amounts:
+  chandalier: 0.63
+  person: 1.2
 localized_edits:
   - region_contains:
       - hanging

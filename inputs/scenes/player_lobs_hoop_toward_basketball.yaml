@@ -18,11 +18,11 @@ localized_edits:
   - region_contains:
       - lobber
     requirements:
-      - "{lobber} is facing towards {lobbed} with a hind leg slightly raised andtheir arm extended towards it as if they just threw it"
+      - "{lobber} is facing towards {lobbed} with a hind leg slightly raised and their arm(s) extended towards it as if they just threw it"
   - region_contains:
       - lobbed
     requirements:
       - "{lobbed} is slightly off-tilt since it is flying through the air"
-      - "short motion trail dash marks extend back from {lobbed} toward {lobber}'s outstretched arm, indicating the lastmost inches of airspace that {lobbed} has flown through since being chucked"
+      - "short motion trail dash marks extend back from {lobbed} toward {lobber}'s outstretched arm(s), indicating the lastmost inches of airspace that {lobbed} has flown through since being chucked"
 final_requirements:
-  - "it is pretty clear that {lobber} threw something that is flying towards {at} and there are not motion trails that seem to contradict this"
+  - "any wind-marks or motion trails from a tossed/lobbed/thrown/chucked object are pointing back towards {lobber} (indicating the object is flying away from them)"

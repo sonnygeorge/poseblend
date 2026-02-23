@@ -3,6 +3,9 @@ action: rides
 role_assignments:
   rider: horse
   ridden: astronaut
+scale_amounts:
+  horse: 0.78
+  astronaut: 1.05
 localized_edits:
   - region_contains:
       - ridden

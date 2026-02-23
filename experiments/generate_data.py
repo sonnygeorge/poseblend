@@ -29,27 +29,68 @@ GENERATION_FIELDS = [
 RUN_LOG_FIELDS = ["scene", "run_id", "run_idx", "num_successes", "num_edit_chains"]
 
 SCENES_TO_CONFIG_OVERRIDES: dict[str, dict] = {
-    # "ball_kicks_athlete_toward_goal": {},
-    # "chandalier_hangs_from_person": {},
-    # "clay_pot_throws_pottery_wheel_at_woman": {
-    #     "num_renders": 15,
-    #     "num_edit_chains": 7,
-    #     "render_resolution_x": 1024,
-    #     "render_resolution_y": 1024,
-    #     "contraction_strength": 0.47,
-    # },
-    # "dog_throws_laptop_over_sign_to_person": {},
-    # "flower_flies_over_bee": {},
-    # "horse_rides_astronaut": {},
-    # "horse_shows_bird_to_person_violin_nearby": {},
-    # "matador_charges_bull": {},
+    "ball_kicks_athlete_toward_goal": {
+        "num_scenes": 2,
+        "num_renders": 11,
+        "num_edit_chains": 6,
+        "contraction_strength": 0.47
+    },
+    "chandalier_hangs_from_person": {
+        "num_scenes": 2,
+        "num_renders": 6,
+        "num_edit_chains": 3,
+        "contraction_strength": 1.1
+    },
+    "clay_pot_throws_pottery_wheel_at_woman": {
+        "num_scenes": 2,
+        "num_renders": 12,
+        "num_edit_chains": 6,
+        "render_resolution_x": 1024,
+        "render_resolution_y": 1024,
+        "contraction_strength": 0.47,
+    },
+    "dog_throws_laptop_over_sign_to_person": {
+        "num_scenes": 1,
+        "num_renders": 14,
+        "num_edit_chains": 5,
+        "contraction_strength": 0.57
+    },
+    "flower_flies_over_bee": {
+        "num_scenes": 2,
+        "num_renders": 7,
+        "num_edit_chains": 3,
+        "contraction_strength": 0.94
+    },
+    "horse_rides_astronaut": {
+        "num_scenes": 3,
+        "num_renders": 7,
+        "num_edit_chains": 5,
+        "contraction_strength": 0.73
+    },
+    "horse_shows_bird_to_person_violin_nearby": {
+       "num_scenes": 2,
+       "num_renders": 9,
+       "num_edit_chains": 5,
+       "contraction_strength": 0.43,
+    },
+    "matador_charges_bull": {
+        "num_scenes": 1,
+        "num_renders": 6,
+        "num_edit_chains": 3,
+        "contraction_strength": 0.5,
+    },
     "mouse_chases_cat": {
       "num_scenes": 1,
-      "num_renders": 4,
+      "num_renders": 6,
       "num_edit_chains": 3,
       "contraction_strength": 1.5,
     },
-    # "player_lobs_hoop_toward_basketball": {},
+    "player_lobs_hoop_toward_basketball": {
+      "num_scenes": 2,
+      "num_renders": 8,
+      "num_edit_chains": 5,
+      "contraction_strength": 0.47,
+    },
 }
 
 
@@ -227,17 +268,17 @@ if __name__ == "__main__":
     async def _main() -> None:
         generations: list[dict] = []
         run_log: list[dict] = []
-        if "poseblend" in args.modes:
-            await _run_poseblend_mode(
-                args.output_dir, args.min_successful, args.edit_model,
-                generations, run_log,
-            )
         for mode in ("t2i_simple", "t2i_detailed"):
             if mode in args.modes:
                 await _run_t2i_mode(
                     args.output_dir, mode, args.min_successful,
                     args.t2i_model, generations,
                 )
+        if "poseblend" in args.modes:
+            await _run_poseblend_mode(
+                args.output_dir, args.min_successful, args.edit_model,
+                generations, run_log,
+            )
         _write_csv(args.output_dir / "generations.csv", GENERATION_FIELDS, generations)
         if run_log:
             _write_csv(args.output_dir / "poseblend_runs.csv", RUN_LOG_FIELDS, run_log)

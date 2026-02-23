@@ -173,8 +173,8 @@ async def _run_single_edit_chain(
                 after_img_path=after_path,
                 prompt_used=prompt,
                 model_used=model_name,
+                background_str=bg_str,
                 critic_invocations=invocations,
-
                 gate_decision=decision,
             ))
             ctx.on_run_data_changed()

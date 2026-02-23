@@ -1,13 +1,18 @@
 from datetime import UTC, datetime
 from pathlib import Path
 
-from pydantic import AliasChoices, BaseModel, Field, model_validator
+from pydantic import AliasChoices, BaseModel, Field, computed_field, model_validator
 
 from poseblend.schema.inputs.blender_objects import BlenderObjectRegistry
 from poseblend.schema.inputs.config import PoseBlendConfig
 from poseblend.schema.inputs.scene_spec import PoseBlendSceneSpec
 from poseblend.schema.lm_outputs import BlenderSceneParams, CriticResult
 from poseblend.utils import load_yaml, save_json
+
+
+class Transform3D(BaseModel):
+    location: list[float]
+    rotation_euler: list[float]
 
 
 class GateDecision(BaseModel):
@@ -26,6 +31,7 @@ class AttemptedEdit(BaseModel):
     after_img_path: Path
     prompt_used: str | None
     model_used: str | None
+    background_str: str | None = None
     critic_invocations: list[CriticInvocation]
     gate_decision: GateDecision
 
@@ -42,11 +48,23 @@ class EditChain(BaseModel):
     final_critic_invocations: list[CriticInvocation] = Field(default_factory=list)
     gate_decision: GateDecision | None = None
 
+    @computed_field
+    @property
+    def background_str(self) -> str | None:
+        if not self.edits:
+            return None
+        bg_attempts = self.edits[0]
+        passing = [a for a in bg_attempts if a.gate_decision.is_passing]
+        if passing:
+            return passing[-1].background_str
+        return None
+
 
 class SceneRender(BaseModel):
     render_id: int
     image_path: Path | None = None
     mask_dir_path: Path | None = None
+    camera_transform: Transform3D | None = None
     critic_invocations: list[CriticInvocation] = Field(default_factory=list)
     render_quality_score: float | None = None
     gate_decision: GateDecision | None = None
@@ -57,6 +75,7 @@ class BlenderScene(BaseModel):
     seed: int | None = None
     params: BlenderSceneParams
     blend_file_path: Path | None = None
+    object_transforms: dict[str, Transform3D] | None = None
     renders: list[SceneRender] = Field(default_factory=list)
     scene_quality_score: float | None = None
     is_selected: bool = False

@@ -1,6 +1,6 @@
 num_blender_scenes: 2
-num_renders: 13
-num_edit_chains: 5
+num_renders: 4
+num_edit_chains: 3
 min_render_quality_score: 0.35
 max_edit_attempts: 3
 max_concurrent_inference_requests: 10
@@ -15,7 +15,7 @@ blender_lm: "gpt-5.2-2025-12-11"
 blender_lm_temperature: 1.4
 critic_vlm: "gpt-5.2-2025-12-11"
 critic_vlm_temperature: 0.5
-contraction_strength: 0.47
+contraction_strength: 0.73
 save_blend_files: false
 # seed: 42
 single_object_check_threshold: 0.4

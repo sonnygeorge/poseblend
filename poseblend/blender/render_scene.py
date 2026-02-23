@@ -163,6 +163,14 @@ def render_scene(job: RenderJob) -> dict:
         if scene_collection.name not in (c.name for c in obj.users_collection):
             scene_collection.objects.link(obj)
 
+    object_transforms = {
+        obj.name: {
+            "location": list(obj.location),
+            "rotation_euler": list(obj.rotation_euler),
+        }
+        for obj in placed_objects
+    }
+
     bbox_all = compute_combined_bbox(placed_objects)
 
     # Setup camera
@@ -239,6 +247,10 @@ def render_scene(job: RenderJob) -> dict:
         manifest_renders.append({
             "image_path": render_path,
             "mask_dir_path": render_mask_dir,
+            "camera_transform": {
+                "location": list(camera.location),
+                "rotation_euler": list(camera.rotation_euler),
+            },
         })
 
     # Optionally save the .blend file
@@ -250,6 +262,7 @@ def render_scene(job: RenderJob) -> dict:
     # Write manifest
     manifest = {
         "blend_file_path": blend_path,
+        "object_transforms": object_transforms,
         "renders": manifest_renders,
     }
     manifest_path = str(output_dir / "manifest.json")

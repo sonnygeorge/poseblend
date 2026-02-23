@@ -11,7 +11,7 @@ from loguru import logger
 
 from poseblend.blender.schema import BlenderObjectSpec, ObjectPlacementParams, RenderJob
 from poseblend.run_context import RunContext
-from poseblend.schema.run_data import BlenderScene, SceneRender
+from poseblend.schema.run_data import BlenderScene, SceneRender, Transform3D
 
 RENDER_SCRIPT_PATH = Path(__file__).resolve().parent.parent / "blender" / "render_scene.py"
 BLENDER_EXE_ENV_VAR = "BLENDER_EXE"
@@ -116,11 +116,17 @@ async def _render_single_scene(
 
         blend_path = manifest.get("blend_file_path")
         scene.blend_file_path = Path(blend_path) if blend_path else None
+        raw_obj_transforms = manifest.get("object_transforms")
+        if raw_obj_transforms:
+            scene.object_transforms = {
+                name: Transform3D(**t) for name, t in raw_obj_transforms.items()
+            }
         scene.renders = [
             SceneRender(
                 render_id=i + 1,
                 image_path=Path(r["image_path"]),
                 mask_dir_path=Path(r["mask_dir_path"]),
+                camera_transform=Transform3D(**r["camera_transform"]) if r.get("camera_transform") else None,
             )
             for i, r in enumerate(manifest["renders"])
         ]
